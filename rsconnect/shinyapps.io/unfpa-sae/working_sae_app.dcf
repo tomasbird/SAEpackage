@@ -1,0 +1,11 @@
+name: working_sae_app
+title:
+username:
+account: unfpa-sae
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4464618
+bundleId: 5206021
+url: https://unfpa-sae.shinyapps.io/working_sae_app/
+when: 1635921742.68147
+lastSyncTime: 1635921742.68149
