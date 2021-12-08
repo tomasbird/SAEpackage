@@ -341,25 +341,25 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     
     ## Objects for Data load Tab
-    source("R/server/load_server_objects.R", local=TRUE)
+    #source("R/server/load_server_objects.R", local=TRUE)
     
     # Data Select Tab
     #source("R/server/load_server_maps.R", local=TRUE)
     
     # Data Compare Tab
-    source("R/server/load_compare_objects.R", local=TRUE)
+    #source("R/server/load_compare_objects.R", local=TRUE)
     
     # Model Build Tab
-    source("R/server/load_model_objects.R", local=TRUE)
+    #source("R/server/load_model_objects.R", local=TRUE)
     
     # Cross Assessments Tab
-    source("R/server/load_assessment_objects.R", local=TRUE)
+    #source("R/server/load_assessment_objects.R", local=TRUE)
   
     # Cross Validation Tab
     #source("R/server/load_Xval_objects.R", local=TRUE)
 
     # Prediction Tab
-    source("R/server/load_prediction_objects.R", local=TRUE)
+    #source("R/server/load_prediction_objects.R", local=TRUE)
 }
 
 # Run the application 
