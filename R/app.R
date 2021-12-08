@@ -3,7 +3,7 @@ library(shiny)
 
 SAEapp=function(...){
 #library(leaflet)
-#source("global.R", local=TRUE)
+#source("R/global.R", local=TRUE)
 #source("R/UI_functions/loaddata_fn.R",local=TRUE)
 
 ui <- fluidPage(
@@ -109,6 +109,7 @@ ui <- fluidPage(
                                           tags$div("Loading survey data...",id="loadmessage")
                          ),
                          fluidRow(plotOutput("surveyMap")),
+                         fluidRow(verbatimTextOutput("surveyshpchk")),
                          fluidRow(DT::dataTableOutput("survey_preview"))
                          ),
                 
@@ -116,7 +117,7 @@ ui <- fluidPage(
                          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                           tags$div("Loading census data...",id="loadmessage")
                          ),
-                         fluidRow(plotOutput("censusMap")%>% withSpinner(color="#0dc5c1")),
+                         fluidRow(plotOutput("censusMap") %>% withSpinner(color="#0dc5c1")),
                          fluidRow(DT::dataTableOutput("census_preview")%>% withSpinner(color="#0dc5c1")))
             )))),
         
@@ -341,25 +342,25 @@ ui <- fluidPage(
 server <- function(input, output, session) {
     
     ## Objects for Data load Tab
-    #source("R/server/load_server_objects.R", local=TRUE)
+    source("R/server/load_server_objects.R", local=TRUE)
     
     # Data Select Tab
-    #source("R/server/load_server_maps.R", local=TRUE)
+    source("R/server/load_server_maps.R", local=TRUE)
     
     # Data Compare Tab
-    #source("R/server/load_compare_objects.R", local=TRUE)
+    source("R/server/load_compare_objects.R", local=TRUE)
     
     # Model Build Tab
-    #source("R/server/load_model_objects.R", local=TRUE)
+    source("R/server/load_model_objects.R", local=TRUE)
     
-    # Cross Assessments Tab
-    #source("R/server/load_assessment_objects.R", local=TRUE)
+    #  Assessments Tab
+    source("R/server/load_assessment_objects.R", local=TRUE)
   
     # Cross Validation Tab
     #source("R/server/load_Xval_objects.R", local=TRUE)
 
     # Prediction Tab
-    #source("R/server/load_prediction_objects.R", local=TRUE)
+    source("R/server/load_prediction_objects.R", local=TRUE)
 }
 
 # Run the application 

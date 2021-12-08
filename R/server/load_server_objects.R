@@ -74,8 +74,9 @@ output$surveyselect_table <- DT::renderDataTable({
 # Preview
 output$census_preview <- DT::renderDataTable({
   req(input$usedemo)
-  DT::datatable(head(censusDF(), n=100)) %>%
-    formatSignif(digits=2)
+  dat=head(censusDF(), n=100)
+  DT::datatable(dat) #%>%
+    #formatSignif(columns= which(sapply(dat, class) %in% c( "numeric")), digits=2)
 })
 
 # preview selected variables
@@ -115,6 +116,7 @@ uploadShpfn=function(usedemo, uploadfile, localfile) {
 
 
 surveyShp <- reactive({
+  req(input$usedemo)
   uploadShpfn(usedemo=input$usedemo, uploadfile=input$survey.shp.file, 
               localfile="R/Shapefiles/sdr_subnational_boundaries3.shp")
 })
@@ -146,7 +148,15 @@ surveyShp <- reactive({
 
 # map of survey areas
 output$surveyMap <- renderPlot({
-plot(surveyShp())
+  surveyShp() %>% 
+    st_as_sf()  %>%
+    ggplot() +
+    geom_sf() +
+    theme_void() 
+})
+
+output$surveyshpchk <- renderText({
+  print(class(surveyShp()))
 })
 
 # census
@@ -184,6 +194,10 @@ censusShp <- reactive({
 
 ## map of census units
 output$censusMap <- renderPlot({
-  plot(censusShp())
+ censusShp() %>% 
+    st_as_sf() %>%
+    ggplot() +
+    geom_sf() +
+    theme_void() 
 })
 
