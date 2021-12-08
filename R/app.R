@@ -3,8 +3,8 @@ library(shiny)
 
 SAEapp=function(...){
 #library(leaflet)
-source("global.R", local=TRUE)
-source("R/UI_functions/loaddata_fn.R",local=TRUE)
+#source("global.R", local=TRUE)
+#source("R/UI_functions/loaddata_fn.R",local=TRUE)
 
 ui <- fluidPage(
         
