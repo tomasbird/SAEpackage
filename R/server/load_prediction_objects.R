@@ -63,6 +63,7 @@ predicted_map_fn=function(shp, data, spatscale, title){
     theme_void() +
     scale_fill_gradientn(colors=c("black", "yellow", "blue"))+
     labs(title=title)
+    
 }
 
 ## plot of predictions from census at survey scale

@@ -1,6 +1,35 @@
 
-#### Functions for Data View Tab
 
+
+### Conditional panel if loading data
+surveyloadPanel=conditionalPanel(
+  condition='input.datatoload == "Survey"', 
+  fileInput("survey.file", "Upload .csv for survey data",
+            multiple = TRUE,
+            accept = c("text/csv",
+                       "text/comma-separated-values,text/plain",
+                       ".csv")),
+  
+  #Input: Select a survey shapefile ----
+  fileInput("survey.shp.file", "Upload survey shapefile",
+            multiple = TRUE, 
+            accept=c('.shp','.dbf','.sbn','.sbx','.shx','.prj','.cpg', '.xml', ".DBF"))
+) 
+
+### Conditional panel if loading data
+censusloadPanel=conditionalPanel(
+  condition='input.datatoload == "Census"', 
+  fileInput("census.file", "Upload .csv for census data",
+            multiple = TRUE,
+            accept = c("text/csv",
+                       "text/comma-separated-values,text/plain",
+                       ".csv")),
+  
+  #Input: Select a survey shapefile ----
+  fileInput("census.shp.file", "Upload census shapefile",
+            multiple = TRUE,
+            accept=c('.shp','.dbf','.sbn','.sbx','.shx','.prj','.cpg', '.xml', ".DBF"))
+) 
 
 ## Function for data file upload
 uploadDF <- function(usedemo, loadfile, localfile){
@@ -31,7 +60,7 @@ output$choose_survey_indicator <- renderUI({
 # survey spatial identifier
 output$choose_survey_spatial <- renderUI({
   req(input$usedemo)
-  selectInput("survey_spatial", "Choose column for survey spatial data", names(surveyDF()))
+  selectInput("survey_spatial", "Choose column for survey areas", names(surveyDF()))
 })
 
 # response variables
@@ -49,7 +78,7 @@ output$choose_census_spatial <- renderUI({
   req(input$usedemo)
   req(input$survey_spatial)
   remspat= which(names(censusDF()) %in% c(input$survey_spatial))
-  selectInput("census_spatial", "Choose column for census spatial data", names(censusDF())[-remspat])
+  selectInput("census_spatial", "Choose column for census areas", names(censusDF())[-remspat])
 })
   
 ## Tabular output for viewing data
@@ -153,6 +182,13 @@ output$surveyMap <- renderPlot({
     ggplot() +
     geom_sf() +
     theme_void() 
+  
+  #ggplotly(p) %>%
+  #  highlight(
+  #    "plotly_hover",
+  #    selected = attrs_selected(line = list(color = "black"))
+  #  ) %>%
+  #  widgetframe::frameWidget()
 })
 
 output$surveyshpchk <- renderText({

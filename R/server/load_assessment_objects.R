@@ -109,7 +109,7 @@ xval=cross_validate(folded_surv, formulas=form(), family="binomial")
 preds=(xval$Predictions[[1]]) %>%
   arrange(Observation)
 
-preds[[input$survey_spatial]] =folded_DHS[[input$survey_spatial]] 
+preds[[input$survey_spatial]] =folded_surv[[input$survey_spatial]] 
 
 preds %>% group_by_at(.vars=c("Fold", input$survey_spatial)) %>%
   summarise(nTarget=sum(Target),

@@ -5,15 +5,14 @@
 ### Conditional panel if loading data
 surveyloadPanel=conditionalPanel(
   condition='input.datatoload == "Survey"', 
-  p("Choose survey files"),
-  fileInput("survey.file", "Choose file for survey data",
+  fileInput("survey.file", "Upload .csv for survey data",
             multiple = TRUE,
             accept = c("text/csv",
                        "text/comma-separated-values,text/plain",
                        ".csv")),
   
   #Input: Select a survey shapefile ----
-  fileInput("survey.shp.file", "Choose file for survey spatial data",
+  fileInput("survey.shp.file", "Upload survey shapefile",
             multiple = TRUE, 
             accept=c('.shp','.dbf','.sbn','.sbx','.shx','.prj','.cpg', '.xml', ".DBF"))
 ) 
@@ -21,15 +20,14 @@ surveyloadPanel=conditionalPanel(
 ### Conditional panel if loading data
 censusloadPanel=conditionalPanel(
   condition='input.datatoload == "Census"', 
-  p("Choose census files"),
-  fileInput("census.file", "Choose file for census data",
+  fileInput("census.file", "Upload .csv for census data",
             multiple = TRUE,
             accept = c("text/csv",
                        "text/comma-separated-values,text/plain",
                        ".csv")),
   
   #Input: Select a survey shapefile ----
-  fileInput("census.shp.file", "Choose file for census spatial data",
+  fileInput("census.shp.file", "Upload census shapefile",
             multiple = TRUE,
             accept=c('.shp','.dbf','.sbn','.sbx','.shx','.prj','.cpg', '.xml', ".DBF"))
 ) 
