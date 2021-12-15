@@ -19,7 +19,7 @@ surveyloadPanel=conditionalPanel(
 
 ### Conditional panel if loading data
 censusloadPanel=conditionalPanel(
-  condition='input.datatoload == "Census"', 
+  condition='(input.datatoload == "Census")', 
   fileInput("census.file", "Upload .csv for census data",
             multiple = TRUE,
             accept = c("text/csv",

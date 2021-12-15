@@ -112,16 +112,39 @@ output$direct_plot_down<-downloadHandler(
 
 
 
-## table of predicted at survey
+# function for predictions
+pred_output_table_fn=function(dat, digits=2){
+  DT::datatable(dat) %>%
+    formatSignif(columns= which(sapply(census_predicted_at_survey(), class) %in% c("integer", "numeric")), digits=digits)  
+}
+
+
+## display table of predicted at survey
 output$predicted_survey_table=DT::renderDataTable({
-  DT::datatable(census_predicted_at_survey()) %>%
-    formatSignif(columns= which(sapply(census_predicted_at_survey(), class) %in% c("integer", "numeric")), digits=2)
+  pred_output_table_fn(dat=census_predicted_at_survey(), digits=2)
 })
 
 
-## table of predicted at census
+## display table of predicted at census
 output$predicted_census_table=DT::renderDataTable({
-  DT::datatable(census_predicted_at_census())  %>%
-    formatSignif(columns= which(sapply(census_predicted_at_census(), class) %in% c("integer", "numeric")), digits=2)
+  pred_output_table_fn(dat=census_predicted_at_census(), digits=2)
 })
 
+
+# download table predicted at surveylevel
+output$pred_survey_table_down<-downloadHandler(
+  filename = function() {
+    paste0("Tabular_predictions_at_survey_scale", ".csv")
+  },
+  content = function(file) {
+    ggsave(file,  pred_output_table_fn(dat=census_predicted_at_survey(), digits=2))
+  })
+
+# download table predicted at census level
+output$pred_census_table_down<-downloadHandler(
+  filename = function() {
+    paste0("Tabular_predictions_at_census_scale", ".csv")
+  },
+  content = function(file) {
+    ggsave(file,  pred_output_table_fn(dat=census_predicted_at_census(), digits=2))
+  })

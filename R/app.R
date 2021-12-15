@@ -31,49 +31,13 @@ ui <- fluidPage(
                                    Following model creation, the user may assess the model fit in a number of ways, followed by prediction
                                    onto census data.", 
                                    style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
-                                 
+                                 br(),
                                  h4("Preparation"),
                                  p("For learning purposes, survey, census and spatial data are available for the Nepal 2015 DHS
                                    and 2015 census. Users can also load their own data, if they are properly formatted.", 
                                    style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
-                                 
-                                 
                                  ))),
-                 #fluidRow( column(2, titlePanel("Select Files"), 
-                                     #br(),
-                                    # p("This panel allows the user to choose what spatial and numerical data files to use.
-                                    #   If desired, the user can also use demonstration data.", 
-                                    #   style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
-                         # column(2, titlePanel("Choose Data"), 
-                         #        br(),
-                         #        p("Here the user selects which columns are to be modeled as the indicator, and which
-                         #          are variables to be used as predictors.",
-                         #          style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
-                          #column(2, titlePanel("Compare Data"), 
-                          #       br(), 
-                          #       p("The census and survey data must be compared in terms of their spatial and numerical
-                          #         distributions, to ensure that they are suitable for prediction.",
-                          #         style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
-                          #column(2, titlePanel("Model Setup"), 
-                          #       br(),
-                          #       p("The model setup step allows the user to test different model scenarios, before addding a
-                          #         spatial random effect.",
-                          #         style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
-                          #column(2, titlePanel("Power Analysis"),
-                          #       br(),
-                          #       p("In this step, the user can assess the fit of the chosen model through a number of tests.",
-                           #        style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
-                          #column(2, titlePanel("Cross Validation"), 
-                          #       br(),
-                          #       p("Cross validation allows the user to check the predictive power of the 
-                          #         model through repeated subsampling", style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
-                          #column(2, titlePanel("Prediction"),
-                          #       br(),
-                          #       p("Finally, the user is able to use the derived model to predict onto the census data.", 
-                          #         style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")
-                           #     ))
-                                 
-                 #),
+                 
         
         
         ## Data load
@@ -85,18 +49,30 @@ ui <- fluidPage(
             # Sidebar panel for inputs ----
             sidebarPanel(
                 
-                h4("Load data source"),
+                h3("Load data source"),
                 p("This panel allows the user to choose what spatial and numerical data files to use.
                                        If desired, the user can also use demonstration data.", 
                   style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
                 # Input: Choose a data source
                 checkboxInput("usedemo", label = "Check to use demo data", value = TRUE),
-           
-           #Choose survey data files [from loaddata_fn.R]
-           surveyloadPanel,
-           
-           #Choose census data files [from loaddata_fn.R]
-           censusloadPanel,
+          
+                #Choose survey data files 
+                surveyloadPanel,
+                
+                #Choose census data files 
+                censusloadPanel,
+                
+            h3("Selection of variables"),
+            
+            conditionalPanel('input.datatoload === "Survey"',
+              p("Choose an indicator variable to model and acolumn representing the survey area names. This spatial variable should be present 
+              in the census data as well, and be present in the survey shapefiles.", 
+              style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
+            
+            conditionalPanel('input.datatoload === "Census"',
+              p("Choose a column for census area names. These names should be present in the census shapefile. 
+                Then choose variables to be used as predictors for the indicator of interest.", 
+                              style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
            
            # Choose indicator and spatial data
            conditionalPanel(
@@ -105,7 +81,7 @@ ui <- fluidPage(
                            uiOutput("choose_survey_spatial")
                            ),
                
-                       conditionalPanel(
+           conditionalPanel(
                            'input.datatoload === "Census"',
                           uiOutput("choose_census_spatial"),
                           uiOutput("choose_census_vars"))
@@ -320,8 +296,14 @@ ui <- fluidPage(
                                column(4, downloadButton("direct_plot_down", "Download Direct Estimates")))
                     ),
                     tabPanel("Table output", titlePanel("Tabular predictions"),
+                             br(),
+                             h4("Results within survey regions"),
                              fluidRow(DT::dataTableOutput("predicted_survey_table")%>% withSpinner(color="#0dc5c1")),
-                             fluidRow(DT::dataTableOutput("predicted_census_table")%>% withSpinner(color="#0dc5c1"))
+                             fluidRow(downloadButton("pred_survey_table_down", "Download survey level predictions")),
+                             br(),
+                             h4("Results within census regions"),
+                             fluidRow(DT::dataTableOutput("predicted_census_table")%>% withSpinner(color="#0dc5c1")),
+                             downloadButton("pred_census_table_down", "Download census level predictions")
                     )
                 )
             )))#))##,
