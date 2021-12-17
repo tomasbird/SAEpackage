@@ -39,7 +39,6 @@ ui <- fluidPage(
                                  ))),
                  
         
-        
         ## Data load
         # App title ----
         tabPanel("Select Data",
@@ -62,16 +61,16 @@ ui <- fluidPage(
                 #Choose census data files 
                 censusloadPanel,
                 
-            h3("Selection of variables"),
+            h3("Select variables"),
             
             conditionalPanel('input.datatoload === "Survey"',
-              p("Choose an indicator variable to model and acolumn representing the survey area names. This spatial variable should be present 
-              in the census data as well, and be present in the survey shapefiles.", 
+              p("Choose an indicator variable and a column for the survey area names. It should also be present 
+              in the census data and survey shapefile.", 
               style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
             
             conditionalPanel('input.datatoload === "Census"',
-              p("Choose a column for census area names. These names should be present in the census shapefile. 
-                Then choose variables to be used as predictors for the indicator of interest.", 
+              p("Choose a column for census area names. This should be present in the census shapefile. 
+                Choose variables to be used as predictors in the model.", 
                               style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
            
            # Choose indicator and spatial data
@@ -135,13 +134,14 @@ ui <- fluidPage(
                     tabPanel("Correlations", titlePanel("Correlations"),
                              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                               tags$div("Loading correlations...",id="loadmessage")),
-                             fluidRow(plotOutput("VarsR2plot") %>% withSpinner(color="#0dc5c1"))),
+                             fluidRow(plotOutput("VarsR2plot") %>% withSpinner(color="#0dc5c1")),
+                             downloadButton("VarsR2plot_down", "Download comparisons")),
                     
                     tabPanel("Distributions", titlePanel("Numerical"),
                              fluidRow(column(6, plotOutput("compare_vars_barplot")),
                                       column(6, plotOutput("compare_vars_scatterplot"))),
-                             fluidRow(column(6,downloadButton("vars_barplot_down", "Download Barplot")),
-                                      column(6,downloadButton("vars_scatter_down", "Download Scatterplot"))),
+                             fluidRow(column(6,downloadButton("compare_vars_barplot_down", "Download Barplot")),
+                                      column(6,downloadButton("compare_vars_scatterplot_down", "Download Scatterplot"))),
                               ),
                     tabPanel("Spatial",
                              fluidRow(titlePanel("Frequency of observations by survey area")),

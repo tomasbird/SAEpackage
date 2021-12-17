@@ -90,13 +90,16 @@ Cen_Agg=reactive( {
   })
 
 
-## bar plot to compare census and survey distributions
-output$compare_vars_scatterplot <- renderPlot({
-  SURV= Surv_Agg() %>% 
+### bar plot to compare census and survey distributions
+
+
+### stuff for scatterplot display
+compare_vars_scatterplot_fn <- function(cen, surv){
+  SURV= surv %>% 
     mutate(freqdatsurv=freqreg) %>%
     select_all(.vars=c(input$select_suvey_spatial, input$show_survey_vars, "freqdatsurv"))
   
-  CEN= Cen_Agg() %>%
+  CEN= cen %>%
     mutate(freqdatcen=freqreg) %>%
     select_all(.vars=c(input$survey_spatial, input$show_survey_vars, "freqdatcen"))
   
@@ -106,31 +109,57 @@ output$compare_vars_scatterplot <- renderPlot({
       geom_point(position="dodge") + 
       facet_wrap(as.formula(paste("~", input$show_survey_vars )), ncol=2) +
       theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5))
+}
+
+# render scatterplot
+output$compare_vars_scatterplot=renderPlot({
+  compare_vars_scatterplot_fn(cen=Cen_Agg(), surv=Surv_Agg())
 })
 
+# download scatterplot
+output$compare_vars_scatterplot_down<-downloadHandler(
+  filename = function() {
+    paste0("scatterplot", ".jpg")
+  },
+  content = function(file) {
+    ggsave(file, compare_vars_scatterplot_fn(surv=Surv_Agg(), cen=Cen_Agg()))
+  })
 
 
-## R2 table for comparing variables
-output$compare_vars_barplot <- renderPlot({
-  SURV=Surv_Agg()
-  
-  CEN=Cen_Agg()
-  
+## Barplot for comparing variables
+# barplot function
+compare_vars_barplot_fn<-function(SURV, CEN){
   ## make plot
   rbind(SURV,CEN) %>%
     ggplot(aes_string(x=input$survey_spatial, y="freqreg",  fill="data")) + 
     geom_col(position="dodge") + 
     facet_wrap(as.formula(paste("~", input$show_survey_vars )), ncol=2) +
     theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5))
-   #rm(SURV, CEN)
+  #rm(SURV, CEN)
+}
+
+
+# render barplot
+output$compare_vars_barplot <- renderPlot({
+  compare_vars_barplot_fn(SURV=Surv_Agg(), CEN=Cen_Agg())
 })
+
+
+# download barplot
+output$compare_vars_barplot_down <-downloadHandler(
+  filename = function() {
+    paste0("barplot", ".jpg")
+  },
+  content = function(file) {
+    ggsave(file, compare_vars_barplot_fn(SURV=Surv_Agg(), CEN=Cen_Agg()))
+  })
 
 
 ### correlation between census and survey data
 ### 
 cen_agg_long <- reactive({
   subset(censusDF(), 
-                     select=c(input$Predictors,  input$survey_spatial)) %>%
+              select=c(input$Predictors,  input$survey_spatial)) %>%
               pivot_longer(cols=input$Predictors, 
                             names_to="Variable", values_to="outcome") %>%
                   group_by_all(.groups=c(input$survey_spatial, "Variable", "outcome")) %>%
@@ -148,9 +177,31 @@ surv_agg_long <- reactive({
 })
 
 
+
+### Things for the R2 plots
+
+# R2 function 
+VarsR2Fun=function(cen,surv){
+  left_join(cen,surv) %>%
+    ggplot(aes(x=n.surv, y=n.cen, colour=outcome)) + 
+    geom_point() +
+    facet_wrap(~Variable)
+}
+
+
+# render R2 plot
 output$VarsR2plot <-renderPlot({
-  left_join(cen_agg_long(),surv_agg_long()) %>%
-      ggplot(aes(x=n.surv, y=n.cen, colour=outcome)) + 
-      geom_point() +
-      facet_wrap(~Variable)
+  VarsR2Fun(cen=cen_agg_long(), surv=surv_agg_long())
     })
+
+
+# Download R2 plot
+output$VarsR2plot_down<-downloadHandler(
+  filename = function() {
+    paste0("R2_plot", ".jpg")
+  },
+  content = function(file) {
+    ggsave(file,   VarsR2Fun(cen=cen_agg_long(), surv=surv_agg_long()))
+  })
+  
+  
