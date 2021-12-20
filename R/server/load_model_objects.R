@@ -103,7 +103,7 @@ form_rfx<-reactive({
 
 
 form=reactive({ 
-    paste(input$indicator, "~" , paste0(input$model_params, collapse=" + "))
+    paste(input$indicator, "~" , paste0(input$model_params, collapse=" + "), "+", input$survey_spatial)
   })
 
 ## print formula as text

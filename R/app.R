@@ -49,9 +49,9 @@ ui <- fluidPage(
             sidebarPanel(
                 
                 h3("Load data source"),
-                p("This panel allows the user to choose what spatial and numerical data files to use.
-                                       If desired, the user can also use demonstration data.", 
-                  style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
+                p("Choose spatial and numerical data files.
+                                       Or use demonstration data by checking the box below."), 
+                  #style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
                 # Input: Choose a data source
                 checkboxInput("usedemo", label = "Check to use demo data", value = TRUE),
           
@@ -64,14 +64,14 @@ ui <- fluidPage(
             h3("Select variables"),
             
             conditionalPanel('input.datatoload === "Survey"',
-              p("Choose an indicator variable and a column for the survey area names. It should also be present 
-              in the census data and survey shapefile.", 
-              style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
+              p("Choose indicator variable survey area names. Survey area should also be present 
+              in the census data and survey shapefile.")), 
+              #style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
             
             conditionalPanel('input.datatoload === "Census"',
               p("Choose a column for census area names. This should be present in the census shapefile. 
-                Choose variables to be used as predictors in the model.", 
-                              style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
+                Choose variables to be used as predictors in the model.")), 
+                             # style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
            
            # Choose indicator and spatial data
            conditionalPanel(
@@ -103,8 +103,9 @@ ui <- fluidPage(
                                           tags$div("Loading census data...",id="loadmessage")
                          ),
                          fluidRow(plotOutput("censusMap") %>% withSpinner(color="#0dc5c1")),
-                         fluidRow(DT::dataTableOutput("census_preview")%>% withSpinner(color="#0dc5c1")))
-            )))),
+                         #fluidRow(verbatimTextOutput("census_exists")%>% withSpinner(color="#0dc5c1")))
+                         fluidRow(DT::dataTableOutput("census_preview"))) #%>% withSpinner(color="#0dc5c1")))
+                         )))),
         
 
         
@@ -120,8 +121,7 @@ ui <- fluidPage(
                 
                 conditionalPanel('input.comparison=="Distributions"',
                     p("For each predictive variable, we check whether the distributions 
-                      in each category is similar between regions"),
-                    uiOutput("show_survey_vars")),
+                      in each category is similar between regions")),
                 
                 conditionalPanel('input.comparison=="Spatial"',
                                  p("We also check to see whether the relative sampling effort was 
@@ -131,20 +131,23 @@ ui <- fluidPage(
             #mainPanel(
                 tabsetPanel(
                     id = 'comparison',
-                    tabPanel("Correlations", titlePanel("Correlations"),
+                    tabPanel("Correlations", #titlePanel("Correlations"),
                              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                               tags$div("Loading correlations...",id="loadmessage")),
                              fluidRow(plotOutput("VarsR2plot") %>% withSpinner(color="#0dc5c1")),
                              downloadButton("VarsR2plot_down", "Download comparisons")),
                     
-                    tabPanel("Distributions", titlePanel("Numerical"),
+                    tabPanel("Distributions", #titlePanel("Numerical"),
+                             conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                              tags$div("Loading plots",id="loadmessage")),
+                             uiOutput("show_survey_vars"),
                              fluidRow(column(6, plotOutput("compare_vars_barplot")),
                                       column(6, plotOutput("compare_vars_scatterplot"))),
                              fluidRow(column(6,downloadButton("compare_vars_barplot_down", "Download Barplot")),
                                       column(6,downloadButton("compare_vars_scatterplot_down", "Download Scatterplot"))),
                               ),
                     tabPanel("Spatial",
-                             fluidRow(titlePanel("Frequency of observations by survey area")),
+                             fluidRow(h3("Frequency of observations by survey area")),
                              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                               tags$div("Loading maps...",id="loadmessage")),
                              fluidRow(plotOutput("survey_freq_plot")), 
@@ -158,14 +161,13 @@ ui <- fluidPage(
         tabPanel('Model Setup', sidebarLayout(
             sidebarPanel(
                 titlePanel("Build the Model"),
-                p(),
                 conditionalPanel('input.modelbuild=="Parameter Tests"',
                     br(),
-                    titlePanel("Aliasing"),
+                    h3("Aliasing"),
                     p("Aliasing refers to when two variables are perfectly correlated. "),
                     actionButton("checkalias", "Check for Aliasing"),             
                     br(),
-                    titlePanel("Collinearity"),
+                    h3("Collinearity"),
                     p("Collinearity occurs when two variables are closely correlated.  We can
                       check for collinearity by calculating the variance inflation factor (vif)
                       for all variables in a model."),
@@ -173,8 +175,8 @@ ui <- fluidPage(
                     br()
                     ),
                 conditionalPanel('input.modelbuild=="Build the Model"',
-                    titlePanel("Stepwise regression"),
-                    p("We can use stepwise regression to select a best subset of the available variables"),
+                    h3("Stepwise regression"),
+                    p("Stepwise regression selects a best subset of the available variables."),
                     br(),
                     actionButton("runstepwise", "Stepwise variable selection", icon=icon("shoe-prints")),             
                     uiOutput("include_rfx")
@@ -193,11 +195,11 @@ ui <- fluidPage(
                              p("While we may have data available for many parameters, not all should be used 
                                at the same time in the model. In this panel, we test for Aliasing and Multicollinearity
                                to determine which variables should be excluded."),
-                             titlePanel("Alias Report"),
+                             h3("Alias Report"),
                              p("Aliasing exists when two variables are perfectly correlated."),
                              fluidRow(textOutput("Aliasreport")),
                              p(),
-                             titlePanel("Variance Inflation Table"),
+                             h3("Variance Inflation Table"),
                              p("Collinearity occurs when multiple variables are highly correlated with one another.  
                                Such correlations can make it difficult to estimate the coefficients for those variables.  Variance
                                 inflation factors help estimate the severity of multicollinearity in individual variables. Variables 
@@ -207,8 +209,12 @@ ui <- fluidPage(
                      ),
                    
                      tabPanel("Build the Model", 
-                              p("Build the model"),
+                              h4("Model Formula"),
+                              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                                               tags$div("Loading formula",id="loadmessage")),
                               fluidRow(textOutput("print_formula")),
+                              br(),
+                              h4("Model Summary"),
                               fluidRow(verbatimTextOutput("model_summary") %>% withSpinner(color="#0dc5c1"))
                               )
                 )
@@ -221,8 +227,8 @@ ui <- fluidPage(
               
               tabPanel("Assess", titlePanel("Assess model fit"),
                        fluidRow(
-                         column(6, titlePanel("Residual Plot")), 
-                         column(6, titlePanel("Observed versus Predicted"))),
+                         column(6, h3("Residual Plot")), 
+                         column(6, h3("Observed versus Predicted"))),
                        fluidRow(
                          column(6, p("A residual plot shows the difference between observed values and those 
                                     expected by the model, or how much the model result varies from reality.")), 
@@ -238,8 +244,8 @@ ui <- fluidPage(
               
               tabPanel("Validation", 
                        fluidRow(
-                         column(6,titlePanel("Confusion matrix")), 
-                         column(6,titlePanel("ROC Curve"))),
+                         column(6,h3("Confusion matrix")), 
+                         column(6,h3("ROC Curve"))),
                        fluidRow(
                          column(6,p("A confusion matrix is another way to assess the difference between 
                                     observed and expected values. The top-left panel indicates the percentage 
@@ -279,13 +285,13 @@ ui <- fluidPage(
                              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                               tags$div("Loading prediction maps...",id="loadmessage")),
                              fluidRow(
-                               column(4,titlePanel("Census-level predictions")),
-                               column(4,titlePanel("Survey-level predictions")),
-                               column(4,titlePanel("Direct Estimates"))),
-                             fluidRow(
-                               column(4,p("Predictions aggregated at census area level")),
-                               column(4,p("Predictions aggregated at survey area level")),
-                               column(4,p("Direct estimates from survey data"))),
+                               column(4,h3("Census-level predictions")),
+                               column(4,h3("Survey-level predictions")),
+                               column(4,h3("Direct Estimates"))),
+                             #fluidRow(
+                             #   column(4,p("Predictions aggregated at census area level")),
+                             #  column(4,p("Predictions aggregated at survey area level")),
+                              # column(4,p("Direct estimates from survey data"))),
                              fluidRow(
                                column(4,plotOutput("predicted_census_map")%>% withSpinner(color="#0dc5c1")),
                                column(4,plotOutput("predicted_survey_map")%>% withSpinner(color="#0dc5c1")),
@@ -296,39 +302,20 @@ ui <- fluidPage(
                                column(4, downloadButton("direct_plot_down", "Download Direct Estimates")))
                     ),
                     tabPanel("Table output", titlePanel("Tabular predictions"),
+                             p("Predicted outputs are presented here as tabular outputs, with mean, lower and upper 
+                               95% confidence intervals."),
                              br(),
-                             h4("Results within survey regions"),
+                             h3("Results within survey regions"),
                              fluidRow(DT::dataTableOutput("predicted_survey_table")%>% withSpinner(color="#0dc5c1")),
                              fluidRow(downloadButton("pred_survey_table_down", "Download survey level predictions")),
                              br(),
-                             h4("Results within census regions"),
+                             h3("Results within census regions"),
                              fluidRow(DT::dataTableOutput("predicted_census_table")%>% withSpinner(color="#0dc5c1")),
                              downloadButton("pred_census_table_down", "Download census level predictions")
                     )
                 )
             )))#))##,
         
-        ## Tab for Map
-  #      tabPanel("Map View",  div(class="outer",
-                    #              tags$head(
-                   #                   # Include our custom CSS
-                  #                    includeCSS("styles.css"),
-                 #                     includeScript("gomap.js")),
-                                  
-                #                  # If not using custom CSS, set height of leafletOutput to a number instead of percent
-               #                   leafletOutput("map", width="100%", height="100%"),
-              #                    
-             #                     # Shiny versions prior to 0.11 should use class = "modal" instead.
-            #                      absolutePanel(id = "controls", class = "panel panel-default", fixed = TRUE,
-           #                                     draggable = TRUE, top = 60, left = "auto", right = 20, bottom = "auto",
-          #                                      width = 330, height = "auto",
-         #                                       h2("Sample mapped output")
-        #                          )
-       # ), tags$div(id="cite",
-      #              'Data compiled for ', tags$em('SAE analysis for Nepal'))
-     #   )
-    #)
-   # )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {

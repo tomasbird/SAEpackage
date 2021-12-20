@@ -113,6 +113,7 @@ compare_vars_scatterplot_fn <- function(cen, surv){
 
 # render scatterplot
 output$compare_vars_scatterplot=renderPlot({
+  req(Surv_Agg(), Cen_Agg())
   compare_vars_scatterplot_fn(cen=Cen_Agg(), surv=Surv_Agg())
 })
 
@@ -141,6 +142,7 @@ compare_vars_barplot_fn<-function(SURV, CEN){
 
 # render barplot
 output$compare_vars_barplot <- renderPlot({
+  req(Surv_Agg(), Cen_Agg())
   compare_vars_barplot_fn(SURV=Surv_Agg(), CEN=Cen_Agg())
 })
 
@@ -191,6 +193,7 @@ VarsR2Fun=function(cen,surv){
 
 # render R2 plot
 output$VarsR2plot <-renderPlot({
+  req(Surv_Agg(), Cen_Agg())
   VarsR2Fun(cen=cen_agg_long(), surv=surv_agg_long())
     })
 

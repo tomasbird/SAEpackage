@@ -45,7 +45,7 @@ surveyDF <- reactive({
 
 ## load census DF 
 censusDF <- reactive({
-  uploadDF(usedemo=input$usedemo, loadfile=input$census.file$datapath, localfile="R/data/census_formatted.csv")
+  uploadDF(usedemo=input$usedemo, loadfile=input$census.file$datapath, localfile="R/data/census_formatted_VDC.csv")
 })
 
 
@@ -85,6 +85,7 @@ output$choose_census_spatial <- renderUI({
 # Survey
 # preview 
 output$survey_preview <- DT::renderDataTable({
+  req(surveyDF())
   dat=head(surveyDF())
   DT::datatable(dat, rownames=FALSE) %>%
     formatSignif(columns=  which(sapply(dat, class) %in% c("numeric")), digits=2)
@@ -101,19 +102,24 @@ output$surveyselect_table <- DT::renderDataTable({
 
 # Census
 # Preview
+#
+output$census_exists <- renderPrint({print(head(censusDF()))})
+
 output$census_preview <- DT::renderDataTable({
-  req(input$usedemo)
-  dat=head(censusDF(), n=100)
-  DT::datatable(dat) #%>%
-    #formatSignif(columns= which(sapply(dat, class) %in% c( "numeric")), digits=2)
+  #req(censusDF())
+  cendat=head(subset(censusDF(), 
+                          select=c(input$Predictors, input$census_spatial, input$survey_spatial)), n=100)
+  DT::datatable(cendat, rownames=FALSE) #%>%
+    #formatSignif(columns=  which(sapply(cendat, class) %in% c("numeric")), digits=2)
+  
 })
 
 # preview selected variables
-output$censusselect_table <- DT::renderDataTable({
-  req(input$usedemo)
-  DT::datatable(head(subset(censusDF(), 
-                            select=c(input$Predictors, input$census_spatial, input$survey_spatial))), n=100)
-})
+#output$censusselect_table <- DT::renderDataTable({
+#  req(censusDF())
+#  DT::datatable(head(subset(censusDF(), 
+#                            select=c(input$Predictors, input$census_spatial, input$survey_spatial))), n=100)
+#})
 
 
 
@@ -150,49 +156,16 @@ surveyShp <- reactive({
               localfile="R/Shapefiles/sdr_subnational_boundaries3.shp")
 })
 
-#surveyShp <- reactive({
-  #req(input$survey.shp.file)
-#  if(input$usedemo==FALSE) {
-#  if (!is.null(input$survey.shp.file)){
-#    shpDF <- input$survey.shp.file
-#    prevWD <- getwd()
-#    uploadDirectory <- dirname(shpDF$datapath[1])
-#    setwd(uploadDirectory)
-#    for (i in 1:nrow(shpDF)){
-#      file.rename(shpDF$datapath[i], shpDF$name[i])
-#    }
-#    shpName <- shpDF$name[grep(x=shpDF$name, pattern="*.shp")]
-#      if(length(shpName)>1) shpName=shpName[-(grep(".xml", shpName))]
-#    shpPath <- paste(uploadDirectory, shpName, sep="/")
-#    setwd(prevWD)
-#    survey_shp <- readOGR(shpPath)
-#    return(survey_shp)
-#  } else {
-#    return()
-#  }
-#  } else {
-#      survey_shp = readOGR("R/Shapefiles/sdr_subnational_boundaries3.shp")
-#      return(survey_shp)}
-#})
 
 # map of survey areas
 output$surveyMap <- renderPlot({
+  req(surveyShp())
   surveyShp() %>% 
     st_as_sf()  %>%
     ggplot() +
     geom_sf() +
     theme_void() 
-  
-  #ggplotly(p) %>%
-  #  highlight(
-  #    "plotly_hover",
-  #    selected = attrs_selected(line = list(color = "black"))
-  #  ) %>%
-  #  widgetframe::frameWidget()
-})
 
-output$surveyshpchk <- renderText({
-  print(class(surveyShp()))
 })
 
 # census
@@ -202,35 +175,10 @@ censusShp <- reactive({
 })
 
 
-#censusShp <- reactive({
-  #req(input$survey.shp.file)
-#  if(input$usedemo==FALSE) {
-#      shpDF <- input$census.shp.file
-##    if (!is.null(input$census.shp.file)){
-#      prevWD <- getwd()
-#      setwd(uploadDirectory)
-##      uploadDirectory <- dirname(shpDF$datapath[1])
-#      for (i in 1:nrow(shpDF)){
-#        file.rename(shpDF$datapath[i], shpDF$name[i])
-#      }
-#      shpName <- shpDF$name[grep(x=shpDF$name, pattern="*.shp")]
-#      if(length(shpName)>1) shpName=shpName[-(grep(".xml", shpName))]
-#      shpPath <- paste(uploadDirectory, shpName, sep="/")
-#      setwd(prevWD)
-#      census_shp <- readOGR(shpPath)
-#      return(census_shp)
-#    } else {
-#      return()
-#    }
-#  } else {
-#    census_shp = readOGR("R/Shapefiles/nepal_districts.shp")
-#    return(census_shp)}
-#})
-
-
 ## map of census units
 output$censusMap <- renderPlot({
- censusShp() %>% 
+  req(censusShp())
+  censusShp() %>% 
     st_as_sf() %>%
     ggplot() +
     geom_sf() +

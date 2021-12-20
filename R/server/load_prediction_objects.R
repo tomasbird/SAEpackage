@@ -137,7 +137,7 @@ output$pred_survey_table_down<-downloadHandler(
     paste0("Tabular_predictions_at_survey_scale", ".csv")
   },
   content = function(file) {
-    ggsave(file,  pred_output_table_fn(dat=census_predicted_at_survey(), digits=2))
+    write.csv(file,  pred_output_table_fn(dat=census_predicted_at_survey(), digits=4))
   })
 
 # download table predicted at census level
@@ -146,5 +146,5 @@ output$pred_census_table_down<-downloadHandler(
     paste0("Tabular_predictions_at_census_scale", ".csv")
   },
   content = function(file) {
-    ggsave(file,  pred_output_table_fn(dat=census_predicted_at_census(), digits=2))
+    write.csv(file,  pred_output_table_fn(dat=census_predicted_at_census(), digits=4))
   })
