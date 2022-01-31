@@ -36,6 +36,9 @@ ui <- fluidPage(
                                  p("For learning purposes, survey, census and spatial data are available for the Nepal 2015 DHS
                                    and 2015 census. Users can also load their own data, if they are properly formatted.", 
                                    style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
+                                 h5("Matching survey and census data")
+            
+                                 #fluidRow(column(6, img(src="www/surveyheader.png", height=140,width=240))),
                                  ))),
                  
         
@@ -94,15 +97,32 @@ ui <- fluidPage(
                          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                           tags$div("Loading survey data...",id="loadmessage")
                          ),
+                         conditionalPanel(condition="output.survey_preview === undefined", 
+                                          h3("Please load some data")
+                                          ),
+                         #conditionalPanel(condition="input.indicator === input.survey_spatial", 
+                          #                h3("Indicator and spatial columns should be different")
+                         #),
                          fluidRow(plotOutput("surveyMap")),
-                         fluidRow(DT::dataTableOutput("survey_preview"))
+                         fluidRow(DT::dataTableOutput("survey_preview")),
+                         fluidRow(verbatimTextOutput("pathprint"))
                          ),
                 
                 tabPanel("Census", 
                          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                           tags$div("Loading census data...",id="loadmessage")
                          ),
+                         conditionalPanel(condition="output.census_preview === undefined", 
+                                          h3("Please load some data")
+                         ),
+                         #conditionalPanel(condition="input.indicator === undefined", 
+                        #                  h3("Please choose a survey indicator")
+                         #),
+                         #conditionalPanel(condition="input.indicator !in names(output.survey_preview)", 
+                         #                  h3("Please choose a survey indicator")
+                         #),
                          fluidRow(plotOutput("censusMap") %>% withSpinner(color="#0dc5c1")),
+                         #fluidRow(verbatimTextOutput("censusprint")),
                          #fluidRow(verbatimTextOutput("census_exists")%>% withSpinner(color="#0dc5c1")))
                          fluidRow(DT::dataTableOutput("census_preview"))) #%>% withSpinner(color="#0dc5c1")))
                          )))),
@@ -250,7 +270,7 @@ ui <- fluidPage(
                          column(6,p("A confusion matrix is another way to assess the difference between 
                                     observed and expected values. The top-left panel indicates the percentage 
                                     of true positive observations the model predicted correctly, while the bottom-right 
-                                    shows true negatives.  The top-left and bottom right indicate false positive and 
+                                    shows true negatives.  The top-right and bottom left indicate false positive and 
                                     false negatives.")), 
                          column(6,p("The Receiver-Operating Curve shows the rate at which the model distinguishes true 
                                     positives relative to the false positive rate. "))),
@@ -285,21 +305,27 @@ ui <- fluidPage(
                              conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                               tags$div("Loading prediction maps...",id="loadmessage")),
                              fluidRow(
-                               column(4,h3("Census-level predictions")),
-                               column(4,h3("Survey-level predictions")),
-                               column(4,h3("Direct Estimates"))),
+                               column(4, fluidRow(h3("Census-level predictions")),
+                                          fluidRow(br()),
+                                          fluidRow(downloadButton("predicted_census_down", "Download Census Predictions"))),
+                               column(8, plotOutput("predicted_census_map")%>% withSpinner(color="#0dc5c1"))),
+                               #column(2, downloadButton("predicted_census_down", "Download Direct Estimates"))),
                              #fluidRow(
                              #   column(4,p("Predictions aggregated at census area level")),
                              #  column(4,p("Predictions aggregated at survey area level")),
                               # column(4,p("Direct estimates from survey data"))),
                              fluidRow(
-                               column(4,plotOutput("predicted_census_map")%>% withSpinner(color="#0dc5c1")),
-                               column(4,plotOutput("predicted_survey_map")%>% withSpinner(color="#0dc5c1")),
-                               column(4,plotOutput("direct_plot") %>% withSpinner(color="#0dc5c1"))),
-                             fluidRow(
-                               column(4, downloadButton("predicted_census_down", "Predictions at census area")),
-                               column(4, downloadButton("predicted_survey_map_down", "Predictions at survey area")),
-                               column(4, downloadButton("direct_plot_down", "Download Direct Estimates")))
+                               column(4, fluidRow(h3("Survey-level predictions")),
+                                        fluidRow(br()),
+                                        fluidRow(downloadButton("predicted_survey_down", "Download Survey Predictions"))),
+                               column(8, plotOutput("predicted_survey_map")%>% withSpinner(color="#0dc5c1"))),
+                               #column(2, downloadButton("predicted_survey_map_down", "Predictions at survey area"))),
+                               fluidRow(
+                               column(4, fluidRow(h3("Direct Estimates")),
+                                         fluidRow(br()),
+                                         fluidRow(downloadButton("direct_estimate_map_down", "Estimates"))),
+                               column(8, plotOutput("direct_plot")%>% withSpinner(color="#0dc5c1"))),
+                               #column(2, downloadButton("direct_estimate_map_down", "Direct Estimates at survey area")))
                     ),
                     tabPanel("Table output", titlePanel("Tabular predictions"),
                              p("Predicted outputs are presented here as tabular outputs, with mean, lower and upper 

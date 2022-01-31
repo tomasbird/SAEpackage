@@ -1,0 +1,64 @@
+---
+title: "UNFPA SAE App documentation"
+author: "Tom Bird"
+date: "13/01/2022"
+output: 
+  pdf_document:
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Introduction
+
+This document provides an introduction the the UNFPA small area estimation application.  
+
+# Background
+
+# Analytic Approach
+
+# Outline of the application
+
+## Landing Page
+
+## Select Data
+
+### Survey
+
+### Census
+
+## Compare Data
+
+### Correlations
+
+### Distributions
+
+### Spatial
+
+## Model Setup
+
+### Parameter Tests
+
+### Build the Model
+
+
+## Model Assessment
+
+### Assess
+
+### Validation
+
+### Cross Validation
+
+
+## Prediction
+
+### Map output
+
+### Table output
+
+
+
+
