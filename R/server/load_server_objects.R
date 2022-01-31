@@ -165,7 +165,7 @@ output$census_preview <- DT::renderDataTable({
 surveyShp <- reactive({
   #req(input$survey.shp.file)
   #uploadShpfn(usedemo=input$usedemo, uploadfile=input$survey.shp.file, 
-              localfile="R/Shapefiles/sdr_subnational_boundaries3.shp"
+              localfile="R/Shapefiles/DHS_Regions.shp"
   if(input$usedemo==FALSE) {
     if (!is.null(input$survey.shp.file)){
       shpDF <- input$survey.shp.file
@@ -205,7 +205,7 @@ output$surveyMap <- renderPlot({
 censusShp <- reactive({
   #req(input$census.shp.file)
   #uploadShpfn(usedemo=input$usedemo, uploadfile=input$census.shp.file, 
-  localfile="R/Shapefiles/nepal_districts.shp"
+  localfile="R/Shapefiles/census_districts.shp"
   if(input$usedemo==FALSE) {
     if (!is.null(input$census.shp.file)){
       shpDF <- input$census.shp.file
