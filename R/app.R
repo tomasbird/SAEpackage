@@ -97,12 +97,7 @@ ui <- fluidPage(
                          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                           tags$div("Loading survey data...",id="loadmessage")
                          ),
-                         conditionalPanel(condition="output.survey_preview === undefined", 
-                                          h3("Please load some data")
-                                          ),
-                         #conditionalPanel(condition="input.indicator === input.survey_spatial", 
-                          #                h3("Indicator and spatial columns should be different")
-                         #),
+                         
                          fluidRow(plotOutput("surveyMap")),
                          fluidRow(DT::dataTableOutput("survey_preview")),
                          fluidRow(verbatimTextOutput("pathprint"))
@@ -112,9 +107,7 @@ ui <- fluidPage(
                          conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                           tags$div("Loading census data...",id="loadmessage")
                          ),
-                         conditionalPanel(condition="output.census_preview === undefined", 
-                                          h3("Please load some data")
-                         ),
+                         
                          #conditionalPanel(condition="input.indicator === undefined", 
                         #                  h3("Please choose a survey indicator")
                          #),

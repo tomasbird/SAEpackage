@@ -22,9 +22,9 @@
 
 options(shiny.maxRequestSize=200*1024^2)
 
-packages=c("DT", "pROC", "groupdata2", "tidyr", "sf", "leaps", "merTools", "Metrics", "Rcpp", "car", 
+packages=c( "DT", "pROC", "groupdata2", "tidyr", "sf", "leaps", "merTools", "Metrics", "Rcpp", "car", 
            "cvms", "shinycssloaders", "ggplot2", "rgdal", "sp", "lattice", "scales", "RColorBrewer", 
-           "leaflet", "shiny", "dplyr", "plotly", "widgetframe")
+           "leaflet",  "dplyr", "plotly", "widgetframe","shiny")
 
 ## Now load or install&load all
 package.check <- lapply(

@@ -54,6 +54,10 @@ censusloadPanel=conditionalPanel(
 
 # load survey DF
 surveyDF <- reactive({
+  shiny::validate(
+    need(input$usedemo | !is.null(input$survey.file), "Please load survey dataset")
+    )
+  
   path=ifelse(input$usedemo==TRUE, "R/data/DHS_formatted.csv", input$survey.file$datapath )
   read.csv(path)
   #uploadDF(usedemo=input$usedemo, loadfile=input$survey.file, localfile="R/data/DHS_formatted.csv")
@@ -61,6 +65,9 @@ surveyDF <- reactive({
 
 ## load census DF 
 censusDF <- reactive({
+  shiny::validate(
+    need(input$usedemo | !is.null(input$census.file), "Please load census dataset")
+  )
   #req(input$usedemo)
   cenpath=ifelse(input$usedemo==TRUE, "R/data/census_formatted_VDC.csv", input$census.file$datapath )
   read.csv(cenpath)
@@ -78,7 +85,6 @@ output$choose_survey_indicator <- renderUI({
 
 # survey spatial identifier
 output$choose_survey_spatial <- renderUI({
-  req(surveyShp())
   req(surveyDF())
   selectInput("survey_spatial", "Choose column for survey areas", names(surveyDF()))
 })
@@ -86,9 +92,6 @@ output$choose_survey_spatial <- renderUI({
 # choose response variables
 output$choose_census_vars <- renderUI({
   req(censusDF())
-  #req(censusShp())
-  #req(surveyShp())
-  #req(input$survey_spatial)
   rem= which(names(censusDF()) %in% c(input$survey_spatial, input$census_spatial))
   checkboxGroupInput("Predictors", "Choose predictor variables", 
                      choices=names(censusDF()[-c(rem)]), 
@@ -107,11 +110,14 @@ output$choose_census_spatial <- renderUI({
 # Survey
 # preview 
 output$survey_preview <- DT::renderDataTable({
-  #req(input$usedemo)
   req(surveyDF())
+  #validate(
+   # need(input$usedemo==T, "Please load a dataset", label="surveydfmissing")
+  #)
+
   dat=head(surveyDF(), n=100)
   DT::datatable(surveyDF(), rownames=FALSE) %>%
-    formatSignif(columns=  which(sapply(dat, class) %in% c("numeric")), digits=2)
+    formatSignif(columns =  which(sapply(dat, class) %in% c("numeric")), digits=2)
 })
 
 
@@ -127,10 +133,12 @@ output$survey_preview <- DT::renderDataTable({
 
 
 output$census_preview <- DT::renderDataTable({
-  req(censusDF)
-  #req(subcensus())
+  req(censusDF())
+  shiny::validate(
+   need(censusDF(), "Please load census dataset", label="surveydfmissing")
+  )
   dat=head(subset(censusDF(), select=c(input$Predictors, input$census_spatial, input$survey_spatial)), n=100)
-  DT::datatable(censusDF(), rownames=FALSE) #%>%
+  DT::datatable(dat, rownames=FALSE) #%>%
     #formatSignif(columns=  which(sapply(dat, class) %in% c("numeric")), digits=2)
 })
 
@@ -163,9 +171,12 @@ output$census_preview <- DT::renderDataTable({
 
 
 surveyShp <- reactive({
-  #req(input$survey.shp.file)
-  #uploadShpfn(usedemo=input$usedemo, uploadfile=input$survey.shp.file, 
-              localfile="R/Shapefiles/DHS_Regions.shp"
+ ## Validation
+  shiny::validate(
+    need(input$usedemo | !is.null(input$survey.shp.file), "Please load survey shapefile")
+  )
+  
+  localfile="R/Shapefiles/DHS_Regions.shp"
   if(input$usedemo==FALSE) {
     if (!is.null(input$survey.shp.file)){
       shpDF <- input$survey.shp.file
@@ -192,7 +203,6 @@ surveyShp <- reactive({
 
 # map of survey areas
 output$surveyMap <- renderPlot({
-  #req(input$survey.shp.file)
   req(surveyShp())
   surveyShp() %>% 
     st_as_sf()  %>%
@@ -203,8 +213,10 @@ output$surveyMap <- renderPlot({
 
 # census
 censusShp <- reactive({
-  #req(input$census.shp.file)
-  #uploadShpfn(usedemo=input$usedemo, uploadfile=input$census.shp.file, 
+  shiny::validate(
+    need(input$usedemo | !is.null(input$census.shp.file), "Please load census shapefile")
+  )
+  
   localfile="R/Shapefiles/census_districts.shp"
   if(input$usedemo==FALSE) {
     if (!is.null(input$census.shp.file)){
