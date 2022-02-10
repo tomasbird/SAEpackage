@@ -27,7 +27,7 @@ rangefun=function(cen, surv){
   return(ranges)
 }
 
-
+#####Spatial tab
 # plot frequency of observations at survey scale 
 output$survey_freq_plot <- renderPlot({
   ranges=rangefun(censhpmerge()$freq, srvshpmerge()$freq)
@@ -63,14 +63,19 @@ output$show_survey_vars <- renderUI({
   selectInput("show_survey_vars", "Choose variable to compare", input$Predictors)
 })
 
-output$select_correlation_vars <- renderUI({
-  selectInput("show_correlation_vars", "Choose variables to keep", input$Predictors)
-})
+#output$select_correlation_vars <- renderUI({
+#  selectInput("show_correlation_vars", "Choose variables to keep", input$Predictors)
+#})
 
 
 ## Reactive function aggregating survey data
 Agg_fn=function(df, datatype){
-subset(df, select=c(input$show_survey_vars, input$survey_spatial)) %>%
+shiny::validate(
+  need(input$survey_spatial %in% names(df),  "Survey Spatial variable missing in data frame"),
+  need(names(surveyDF() %in% input$Predictors), "Variable missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+)
+  subset(df, select=c(input$show_survey_vars, input$survey_spatial)) %>%
     group_by_all(.groups=c(input$show_survey_vars, input$survey_spatial)) %>%
     summarise(n=n()) %>%
     group_by(input$survey_spatial) %>%
@@ -80,7 +85,7 @@ subset(df, select=c(input$show_survey_vars, input$survey_spatial)) %>%
     ungroup()
 }
 
-# reactive for survey and census
+# reactive for survey and census aggregated data
 Surv_Agg=reactive( {
   Agg_fn(df=surveyDF(),datatype="Survey")
   })
@@ -92,12 +97,17 @@ Cen_Agg=reactive( {
 
 ### bar plot to compare census and survey distributions
 
-
-### stuff for scatterplot display
+# Correlations Tab
+### stuff for correlations scatterplot display
 compare_vars_scatterplot_fn <- function(cen, surv){
+  shiny::validate(
+    need(names(surveyDF() %in% input$Predictors), "Variable missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+    #need()
+  )
   SURV= surv %>% 
     mutate(freqdatsurv=freqreg) %>%
-    select_all(.vars=c(input$select_suvey_spatial, input$show_survey_vars, "freqdatsurv"))
+    select_all(.vars=c(input$select_survey_spatial, input$show_survey_vars, "freqdatsurv"))
   
   CEN= cen %>%
     mutate(freqdatcen=freqreg) %>%
@@ -113,6 +123,12 @@ compare_vars_scatterplot_fn <- function(cen, surv){
 
 # render scatterplot
 output$compare_vars_scatterplot=renderPlot({
+  shiny::validate(
+    need(names(surveyDF() %in% input$Predictors), "Variable missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+    #need()
+  )
+  
   req(Surv_Agg(), Cen_Agg())
   compare_vars_scatterplot_fn(cen=Cen_Agg(), surv=Surv_Agg())
 })
@@ -124,7 +140,7 @@ output$compare_vars_scatterplot_down<-downloadHandler(
   },
   content = function(file) {
     ggsave(file, compare_vars_scatterplot_fn(surv=Surv_Agg(), cen=Cen_Agg()))
-  })
+})
 
 
 ## Barplot for comparing variables
@@ -149,7 +165,8 @@ output$compare_vars_barplot <- renderPlot({
 
 # download barplot
 output$compare_vars_barplot_down <-downloadHandler(
-  filename = function() {
+  
+   filename = function() {
     paste0("barplot", ".jpg")
   },
   content = function(file) {

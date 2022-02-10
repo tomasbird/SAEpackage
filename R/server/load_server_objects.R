@@ -58,7 +58,7 @@ surveyDF <- reactive({
     need(input$usedemo | !is.null(input$survey.file), "Please load survey dataset")
     )
   
-  path=ifelse(input$usedemo==TRUE, "R/data/DHS_formatted.csv", input$survey.file$datapath )
+  path=ifelse(input$usedemo==TRUE, "R/data/Nepal/tables/NPL_DHS_formatted.csv", input$survey.file$datapath )
   read.csv(path)
   #uploadDF(usedemo=input$usedemo, loadfile=input$survey.file, localfile="R/data/DHS_formatted.csv")
 })
@@ -69,7 +69,7 @@ censusDF <- reactive({
     need(input$usedemo | !is.null(input$census.file), "Please load census dataset")
   )
   #req(input$usedemo)
-  cenpath=ifelse(input$usedemo==TRUE, "R/data/census_formatted_VDC.csv", input$census.file$datapath )
+  cenpath=ifelse(input$usedemo==TRUE, "R/data/Nepal/tables/NPL_census_formatted_VDC.csv", input$census.file$datapath )
   read.csv(cenpath)
   #uploadDF(usedemo=input$usedemo, loadfile=input$census.file$datapath, localfile="R/data/census_formatted_VDC.csv")
 })
@@ -111,32 +111,24 @@ output$choose_census_spatial <- renderUI({
 # preview 
 output$survey_preview <- DT::renderDataTable({
   req(surveyDF())
-  #validate(
-   # need(input$usedemo==T, "Please load a dataset", label="surveydfmissing")
-  #)
-
+  shiny::validate(
+    need(!(input$survey_spatial == input$indicator), "Spatial and indicator variables should be different", label="surveydfmissing")
+  )
+  
   dat=head(surveyDF(), n=100)
   DT::datatable(surveyDF(), rownames=FALSE) %>%
     formatSignif(columns =  which(sapply(dat, class) %in% c("numeric")), digits=2)
 })
 
 
-#output$census_exists <- renderPrint({print(head(censusDF()))})
-#output$censusprint=renderPrint({
-#  print(head(censusDF()))
-#  })
-
-#subcensus=reactive({
-#  req(censusDF())
-#  subset(censusDF(), select=c(input$Predictors, input$census_spatial, input$survey_spatial))
-#})
-
 
 output$census_preview <- DT::renderDataTable({
   req(censusDF())
   shiny::validate(
-   need(censusDF(), "Please load census dataset", label="surveydfmissing")
+   need(censusDF(), "Please load census dataset", label="surveydfmissing"),
+   need(input$survey_spatial %in% names(censusDF()), "Survey spatial variable not found in census data. Please check your selection")
   )
+  
   dat=head(subset(censusDF(), select=c(input$Predictors, input$census_spatial, input$survey_spatial)), n=100)
   DT::datatable(dat, rownames=FALSE) #%>%
     #formatSignif(columns=  which(sapply(dat, class) %in% c("numeric")), digits=2)
@@ -176,7 +168,7 @@ surveyShp <- reactive({
     need(input$usedemo | !is.null(input$survey.shp.file), "Please load survey shapefile")
   )
   
-  localfile="R/Shapefiles/DHS_Regions.shp"
+  localfile="R/data/Nepal/shapefiles/NPL_DHS_Regions.shp"
   if(input$usedemo==FALSE) {
     if (!is.null(input$survey.shp.file)){
       shpDF <- input$survey.shp.file
@@ -190,20 +182,24 @@ surveyShp <- reactive({
       if(length(shpName)>1) shpName=shpName[-(grep(".xml", shpName))]
       shpPath <- paste(uploadDirectory, shpName, sep="/")
       setwd(prevWD)
-      survey_shp <- readOGR(shpPath)
+      survey_shp <- try(readOGR(shpPath), silent=T)
       return(survey_shp)
     } else {
       return()
     }
   } else {
-    survey_shp = readOGR(localfile)
+    survey_shp = try(readOGR(localfile), silent=T)
     return(survey_shp)}  
 })
 
 
 # map of survey areas
 output$surveyMap <- renderPlot({
-  req(surveyShp())
+  shiny::validate(
+    need(class(surveyShp())=="SpatialPolygonsDataFrame", "No survey shapefile detected. Did you load all associated files?")
+  )
+  
+  #req(surveyShp())
   surveyShp() %>% 
     st_as_sf()  %>%
     ggplot() +
@@ -217,7 +213,7 @@ censusShp <- reactive({
     need(input$usedemo | !is.null(input$census.shp.file), "Please load census shapefile")
   )
   
-  localfile="R/Shapefiles/census_districts.shp"
+  localfile="R/data/Nepal/shapefiles/NPL_census_districts.shp"
   if(input$usedemo==FALSE) {
     if (!is.null(input$census.shp.file)){
       shpDF <- input$census.shp.file
@@ -231,13 +227,13 @@ censusShp <- reactive({
       if(length(shpName)>1) shpName=shpName[-(grep(".xml", shpName))]
       shpPath <- paste(uploadDirectory, shpName, sep="/")
       setwd(prevWD)
-      census_shp <- readOGR(shpPath)
+      census_shp <- try(readOGR(shpPath), silent=T)
       return(census_shp)
     } else {
       return()
     }
   } else {
-    census_shp = readOGR(localfile)
+    census_shp = try(readOGR(localfile), silent=T)
     return(census_shp)}
   
 })
@@ -245,6 +241,10 @@ censusShp <- reactive({
 
 ## map of census units
 output$censusMap <- renderPlot({
+  shiny::validate(
+    need(class(censusShp())=="SpatialPolygonsDataFrame", "No census shapefile detected. Did you load all associated files?")
+  )
+  
   req(censusShp())
   censusShp() %>% 
     st_as_sf() %>%

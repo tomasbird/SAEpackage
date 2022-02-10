@@ -7,14 +7,14 @@ library(ggplot2)
 #### Check Aliasing
 # Button to run AliasTest
 Aliastest <- eventReactive(input$checkalias, {
+  req(surveyDF())
   alias(formula(paste(input$indicator, "~" , 
-                      paste0(input$model_params, collapse=" + "))), 
-        data=surveyDF())
+                      paste0(input$model_params, collapse=" + "))), data=surveyDF())
 })
 
 # Alias report output
 output$Aliasreport <- renderPrint({
-  #req(Aliastest())
+  req(Aliastest())
   aliased=Aliastest()
   al_all=data.frame(aliased$Complete)
   al=names(al_all)[which(al_all<0)]
@@ -26,6 +26,7 @@ output$Aliasreport <- renderPrint({
 ### Check Variance Inflation Factors
 ## VIF test on all variables
 VIFtest <- eventReactive(input$checkvif, {
+  req(surveyDF())
   fullform=formula(paste(input$indicator, "~" , 
                          paste0(input$model_params, collapse=" + ")))
  mod=glm(fullform, data=surveyDF(), family="binomial")
@@ -59,16 +60,13 @@ swfun=function(mod, scope=list(~.), dir="both") {
   stepAIC(object=mod, scope=scope, direction=dir)
 }
 
-
+## reactive values for stepwise regression
 r=reactiveValues()
 r$runstepwise=0
-#r$resetvals=0
 r$stepwise=NULL
-#r$vars=NULL
 
 observeEvent(input$runstepwise, {
   r$runstepwise=1
- # r$resetvals=0
   r$stepwise=swfun(mod=mod(), scope=list(~.), dir="both")
 })
 
