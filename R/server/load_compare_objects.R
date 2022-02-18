@@ -86,10 +86,12 @@ Agg_fn=function(df, datatype){
 
 # reactive for survey and census aggregated data
 Surv_Agg=reactive( {
+  #req(input$show_survey_vars)
   Agg_fn(df=subset(surveyDF(), select=c(input$show_survey_vars, input$survey_spatial)),datatype="Survey")
   })
 
 Cen_Agg=reactive( {
+  #req(input$show_survey_vars)
   Agg_fn(df=subset(censusDF(), select=c(input$show_survey_vars, input$survey_spatial)), datatype="Census")
   })
 
@@ -102,7 +104,7 @@ Cen_Agg=reactive( {
 
 
 compare_vars_scatterplot_fn <- function(cen, surv){
-  
+  req(input$show_survey_vars)
   SURV= surv %>% 
     mutate(freqdatsurv=freqreg) %>%
     select_all(.vars=c(input$select_survey_spatial, input$show_survey_vars, "freqdatsurv"))
@@ -121,7 +123,7 @@ compare_vars_scatterplot_fn <- function(cen, surv){
 
 # render scatterplot
 output$compare_vars_scatterplot=renderPlot({
-  
+  req(input$show_survey_vars)
   req(Surv_Agg(), Cen_Agg())
   compare_vars_scatterplot_fn(cen=Cen_Agg(), surv=Surv_Agg())
 })
@@ -140,6 +142,7 @@ output$compare_vars_scatterplot_down<-downloadHandler(
 # barplot function
 compare_vars_barplot_fn<-function(SURV, CEN){
   ## make plot
+  req(input$show_survey_vars)
   rbind(SURV,CEN) %>%
     ggplot(aes_string(x=input$survey_spatial, y="freqreg",  fill="data")) + 
     geom_col(position="dodge") + 
@@ -152,6 +155,7 @@ compare_vars_barplot_fn<-function(SURV, CEN){
 # render barplot
 output$compare_vars_barplot <- renderPlot({
   req(Surv_Agg(), Cen_Agg())
+  
   compare_vars_barplot_fn(SURV=Surv_Agg(), CEN=Cen_Agg())
 })
 
