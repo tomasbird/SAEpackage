@@ -34,9 +34,10 @@ ui <- fluidPage(
                                  br(),
                                  h4("Preparation"),
                                  p("For learning purposes, survey, census and spatial data are available for the Nepal 2015 DHS
-                                   and 2015 census. Users can also load their own data, if they are properly formatted.", 
+                                   and 2015 census. Users can also load their own data, if they are properly formatted. 
+                                   Data from Sierra Leone are also included for training pursposes.", 
                                    style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
-                                 h5("Matching survey and census data")
+                                 #h5("Matching survey and census data")
             
                                  #fluidRow(column(6, img(src="www/surveyheader.png", height=140,width=240))),
                                  ))),
@@ -56,7 +57,7 @@ ui <- fluidPage(
                                        Or use demonstration data by checking the box below."), 
                   #style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
                 # Input: Choose a data source
-                checkboxInput("usedemo", label = "Check to use demo data", value = TRUE),
+                checkboxInput("usedemo", label = "Check to use Nepal data", value = TRUE),
           
                 #Choose survey data files 
                 surveyloadPanel,
@@ -66,26 +67,33 @@ ui <- fluidPage(
                 
             h3("Select variables"),
             
-            conditionalPanel('input.datatoload === "Survey"',
-              p("Choose indicator variable survey area names. Survey area should also be present 
-              in the census data and survey shapefile.")), 
+            conditionalPanel('input.datatoload === "Survey"',),
+              #p("Choose the indicator to model from survey data.")), 
               #style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
             
-            conditionalPanel('input.datatoload === "Census"',
-              p("Choose a column for census area names. This should be present in the census shapefile. 
-                Choose variables to be used as predictors in the model.")), 
+            conditionalPanel('input.datatoload === "Census"',),
+              #p("Choose a column for census area names. This should be present in the census shapefile. 
+               # Choose variables to be used as predictors in the model.")), 
                              # style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px")),
            
            # Choose indicator and spatial data
            conditionalPanel(
                            'input.datatoload === "Survey"',
+                           p("Choose the indicator to model from survey data."),
                            uiOutput("choose_survey_indicator"),
+                           
+                           p("Choose the column in the survey data that contain the DHS spatial area names"),
                            uiOutput("choose_survey_spatial")
                            ),
                
            conditionalPanel(
                            'input.datatoload === "Census"',
+                          p("Choose the column in the census data representing census spatial areas."),
                           uiOutput("choose_census_spatial"),
+                          
+                          p("Choose variables to be used as predictors. 
+                            Please exclude any variables (such as spatial data) 
+                            that won't be used in the model"),
                           uiOutput("choose_census_vars"))
            ),
            

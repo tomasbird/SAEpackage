@@ -41,7 +41,7 @@ output$survey_freq_plot <- renderPlot({
 # merge census summaries with spatial data
 censhpmerge=reactive({
   mergeshpfn(shp=surveyShp(), df=censusDF(), 
-             select.vars=input$Predictors, select.spatial=input$survey_spatial)
+             select.vars=input$show_survey_vars, select.spatial=input$survey_spatial)
 })
 
 ## plot census frequencies on same scale as surveys
@@ -67,15 +67,14 @@ output$show_survey_vars <- renderUI({
 #  selectInput("show_correlation_vars", "Choose variables to keep", input$Predictors)
 #})
 
+surveyvars=reactive({
+  names(surveyDF())
+})
 
 ## Reactive function aggregating survey data
 Agg_fn=function(df, datatype){
-shiny::validate(
-  need(input$survey_spatial %in% names(df),  "Survey Spatial variable missing in data frame"),
-  need(names(surveyDF() %in% input$Predictors), "Variable missing in survey data.  
-         Check whether unnecessary census spatial variables have been excluded.")
-)
-  subset(df, select=c(input$show_survey_vars, input$survey_spatial)) %>%
+
+    df %>%
     group_by_all(.groups=c(input$show_survey_vars, input$survey_spatial)) %>%
     summarise(n=n()) %>%
     group_by(input$survey_spatial) %>%
@@ -87,24 +86,23 @@ shiny::validate(
 
 # reactive for survey and census aggregated data
 Surv_Agg=reactive( {
-  Agg_fn(df=surveyDF(),datatype="Survey")
+  Agg_fn(df=subset(surveyDF(), select=c(input$show_survey_vars, input$survey_spatial)),datatype="Survey")
   })
 
 Cen_Agg=reactive( {
-  Agg_fn(df=censusDF(), datatype="Census")
+  Agg_fn(df=subset(censusDF(), select=c(input$show_survey_vars, input$survey_spatial)), datatype="Census")
   })
 
 
 ### bar plot to compare census and survey distributions
 
 # Correlations Tab
+## Tab that shows all variables correlated against each other
 ### stuff for correlations scatterplot display
+
+
 compare_vars_scatterplot_fn <- function(cen, surv){
-  shiny::validate(
-    need(names(surveyDF() %in% input$Predictors), "Variable missing in survey data.  
-         Check whether unnecessary census spatial variables have been excluded.")
-    #need()
-  )
+  
   SURV= surv %>% 
     mutate(freqdatsurv=freqreg) %>%
     select_all(.vars=c(input$select_survey_spatial, input$show_survey_vars, "freqdatsurv"))
@@ -123,11 +121,6 @@ compare_vars_scatterplot_fn <- function(cen, surv){
 
 # render scatterplot
 output$compare_vars_scatterplot=renderPlot({
-  shiny::validate(
-    need(names(surveyDF() %in% input$Predictors), "Variable missing in survey data.  
-         Check whether unnecessary census spatial variables have been excluded.")
-    #need()
-  )
   
   req(Surv_Agg(), Cen_Agg())
   compare_vars_scatterplot_fn(cen=Cen_Agg(), surv=Surv_Agg())
@@ -174,7 +167,7 @@ output$compare_vars_barplot_down <-downloadHandler(
   })
 
 
-### correlation between census and survey data
+### Multi-panel correlation plot between census and survey data for all variables
 ### 
 cen_agg_long <- reactive({
   subset(censusDF(), 
@@ -187,6 +180,10 @@ cen_agg_long <- reactive({
 
 
 surv_agg_long <- reactive({
+  shiny::validate(
+    need(sum(1-(input$Predictors %in% names(surveyDF())))==0 , "Predictor missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+  )
   subset(surveyDF(), 
                 select=c(input$Predictors,  input$survey_spatial)) %>%
     pivot_longer(cols=input$Predictors, 
@@ -201,6 +198,10 @@ surv_agg_long <- reactive({
 
 # R2 function 
 VarsR2Fun=function(cen,surv){
+  shiny::validate(
+    need(sum(1-(input$Predictors %in% names(surveyDF())))==0 , "Predictor missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+  )
   left_join(cen,surv) %>%
     ggplot(aes(x=n.surv, y=n.cen, colour=outcome)) + 
     geom_point() +
@@ -210,6 +211,10 @@ VarsR2Fun=function(cen,surv){
 
 # render R2 plot
 output$VarsR2plot <-renderPlot({
+  shiny::validate(
+    need(sum(1-(input$Predictors %in% names(surveyDF())))==0 , "Predictor missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+  )
   req(Surv_Agg(), Cen_Agg())
   VarsR2Fun(cen=cen_agg_long(), surv=surv_agg_long())
     })

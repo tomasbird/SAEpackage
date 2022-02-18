@@ -53,7 +53,7 @@ censusloadPanel=conditionalPanel(
 #output$pathprint=renderPrint({uploadDFpath(usedemo=input$usedemo, loadfile=input$survey.file, localfile="R/data/DHS_formatted.csv")})
 
 # load survey DF
-surveyDF <- reactive({
+rawsurveyDF <- reactive({
   shiny::validate(
     need(input$usedemo | !is.null(input$survey.file), "Please load survey dataset")
     )
@@ -64,7 +64,7 @@ surveyDF <- reactive({
 })
 
 ## load census DF 
-censusDF <- reactive({
+rawcensusDF <- reactive({
   shiny::validate(
     need(input$usedemo | !is.null(input$census.file), "Please load census dataset")
   )
@@ -79,32 +79,41 @@ censusDF <- reactive({
 ## Reactive UI for choosing survey variables to use
 # indicator
 output$choose_survey_indicator <- renderUI({
-  req(surveyDF())
-  selectInput("indicator", "Choose an indicator to model", names(surveyDF()))
+  req(rawsurveyDF())
+  selectInput("indicator", "Indicator to model", names(rawsurveyDF()))
 })
 
 # survey spatial identifier
 output$choose_survey_spatial <- renderUI({
-  req(surveyDF())
-  selectInput("survey_spatial", "Choose column for survey areas", names(surveyDF()))
+  req(rawsurveyDF())
+  selectInput("survey_spatial", "Survey areas", names(rawsurveyDF()))
 })
 
 # choose response variables
 output$choose_census_vars <- renderUI({
-  req(censusDF())
-  rem= which(names(censusDF()) %in% c(input$survey_spatial, input$census_spatial))
-  checkboxGroupInput("Predictors", "Choose predictor variables", 
-                     choices=names(censusDF()[-c(rem)]), 
-                     selected=names(censusDF())[-c(rem)])
+  req(rawcensusDF())
+  rem= which(names(rawcensusDF()) %in% c(input$survey_spatial, input$census_spatial))
+  checkboxGroupInput("Predictors", "Predictor variables", 
+                     choices=names(rawcensusDF()[-c(rem)]), 
+                     selected=names(rawcensusDF())[-c(rem)])
 })
 
 # census spatial identifier
 output$choose_census_spatial <- renderUI({
   #req(surveyShp())
-  req(censusDF(), input$survey_spatial)
-  #remspat= which(names(censusDF()) %in% c(input$survey_spatial))
-  selectInput("census_spatial", "Choose column for census areas", names(censusDF()))#[-remspat])
+  req(rawcensusDF(), input$survey_spatial)
+  remspat= which(names(censusDF()) %in% c(input$survey_spatial))
+  selectInput("census_spatial", "Census area names", names(rawcensusDF())[-remspat])
 })
+
+
+### resulting survey table
+# 
+censusDF=reactive({
+  subset(rawcensusDF(), select=c(input$Predictors, input$census_spatial, input$survey_spatial))
+})
+
+surveyDF=reactive({rawsurveyDF()})
   
 ## Tabular output for viewing data
 # Survey
@@ -129,7 +138,7 @@ output$census_preview <- DT::renderDataTable({
    need(input$survey_spatial %in% names(censusDF()), "Survey spatial variable not found in census data. Please check your selection")
   )
   
-  dat=head(subset(censusDF(), select=c(input$Predictors, input$census_spatial, input$survey_spatial)), n=100)
+  dat=head(censusDF(), n=100)
   DT::datatable(dat, rownames=FALSE) #%>%
     #formatSignif(columns=  which(sapply(dat, class) %in% c("numeric")), digits=2)
 })

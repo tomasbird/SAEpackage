@@ -1,0 +1,99 @@
+---
+title: "SAEApp"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Conducting small area estimation with the UNFPA's SAEApp}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#library(SAEPackage)
+```
+
+# Introduction
+
+This document provides an introduction the the UNFPA small area estimation application.  Small area estimation is a statistical method often used to combine high-resolution census data with 
+subject-specific but lower-resolution household surveys. This application provides a user-friendlty interface for 
+conducting a small-area estimation analysis. The application provides an interface for loading numerical census 
+and survey data, as well as shapefiles for display of results.  Users are directed to choose the relevant indicators 
+from survey data, as well as variables that are common to both survey and census data as a basis for building a linear model. The application presents methods for checking the suitability of variables for modeling.  When the user has 
+constructed a suitable model, the app allows for diagnostic testing of model results and finally prediction of the 
+results into relevant census units. Users can export analytic steps as tabular or figure results.
+
+
+# Background
+The methods used in this application were described by the UNFPA's ____ for use in situations wher
+
+
+## Analytic Approach
+Population demographic data found in international household surveys often use binary responses to estimate prevalence rates in populations. Because of this, the application uses a logistic regression modeling approach.  In addition, the distribution of effort in population health surveys is not equal within the regions, meaning that over-representation of sampling effort in some areas may bias results in others. For this reason, the application allows for use of a random effects model. 
+
+## Outline of the application
+The application consists of different tabs for each stage of the analysis. These include, selecting and comparing data, Setup of the models, model assessment and finally prediction. 
+
+### Selection of harmonized data
+Data selection allows users to either use sample DHS and survey datasets from Nepal, or to load the their own data.  Currently the application does not allow for formatting of data, so all numerical data must be in a harmonized prior to being entered into the application.  For a detailed description of the harmonization process, see ____.: At minimum,  
+1. Item. Survey and census data must share exactly the same variable names
+2. Item. Variables that are common between survey and census must have the same definitions.  For example, categorical variables must have the same number of classes, and these classes must be identical between the two sources
+3. Item. Variables must have roughly similar distributions between census and survey datasets. 
+
+Code to conduct harmonization are included in the appendix. 
+
+Survey and census data each have their own tabs to assist with data loading.  By default, data from Nepal will load, as the 'Use Nepal data' checkbox will be checked.  To use other data, uncheck this box.
+
+
+#### Survey tab
+Survey data should include three different types of data:  the indicator of interest,  a column for the names of the survey regions used and additional columns for variables that will be used in the predictive model.  If loading an external file, uncheck the 'Use Nepal Data' box and click on the 'choose a .csv file' box to select a file.
+
+Once you have selected a file, it should appear at the bottom of the page.  
+
+Next, select a shapefile representing the survey regions.  At present, only ESRI shapefiles are accepted.  it is also important that when selecting the shapefile,  all associated files are selected. Once a shapefile has been loaded it should appear at the top of the page. 
+
+Once the data are loaed, you should select which variable will be the indicator to model. Note that only binary variables are currently supported.  Variables should be formatted as '0' or '1' only.  As well, users can select which variable represents the region or strata names in the data, as these will be used both in mapping and in creation of fixed or random effects. 
+
+
+
+#### Census
+After the survey data are loaded, Census data should be loaded in a similar way. When census data are loaded, they may take a little longer as they tend to be larger than survey data.  Note that the census data should also include the same survey stratum names as the survey data, as well as an additional spatial stratum representing the area at which predictions will be made.  
+
+Users then can select additional predictor variables. Note that only predictors that appear in both survey and census data can be selected.   
+
+### Compare Data. 
+Predictive modeling of small areas based on survey data relies on the assumption that the populations sampled in the survey are a random sample of the census. as such, the types of respondents in census and survey data should be present in similar ratios for each.  Therefore, Before modeling the indicator of interest, it is important to compare the distribution of types.  
+
+
+#### Correlations
+
+#### Distributions
+
+#### Spatial
+
+## Model Setup
+
+### Parameter Tests
+
+### Build the Model
+
+
+## Model Assessment
+
+### Assess
+
+### Validation
+
+### Cross Validation
+
+
+## Prediction
+
+### Map output
+
+### Table output
