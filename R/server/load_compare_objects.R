@@ -40,6 +40,10 @@ output$survey_freq_plot <- renderPlot({
 
 # merge census summaries with spatial data
 censhpmerge=reactive({
+  shiny::validate(
+    need(censusDF(), "Please check to see whether census data have been loaded."),
+    need(surveyDF(), "Please check to see whether survey data have been loaded.")
+  )
   mergeshpfn(shp=surveyShp(), df=censusDF(), 
              select.vars=input$show_survey_vars, select.spatial=input$survey_spatial)
 })
@@ -63,13 +67,7 @@ output$show_survey_vars <- renderUI({
   selectInput("show_survey_vars", "Choose variable to compare", input$Predictors)
 })
 
-#output$select_correlation_vars <- renderUI({
-#  selectInput("show_correlation_vars", "Choose variables to keep", input$Predictors)
-#})
 
-surveyvars=reactive({
-  names(surveyDF())
-})
 
 ## Reactive function aggregating survey data
 Agg_fn=function(df, datatype){
@@ -86,12 +84,16 @@ Agg_fn=function(df, datatype){
 
 # reactive for survey and census aggregated data
 Surv_Agg=reactive( {
-  #req(input$show_survey_vars)
+  #shiny::validate(
+  #  need(input$show_survey_vars, "Please check to see whether survey and census data have been loaded.")
+  #)
   Agg_fn(df=subset(surveyDF(), select=c(input$show_survey_vars, input$survey_spatial)),datatype="Survey")
   })
 
 Cen_Agg=reactive( {
-  #req(input$show_survey_vars)
+  #shiny::validate(
+  #  need(censusDF(), "Please check to see whether census data have been loaded.")
+  #)
   Agg_fn(df=subset(censusDF(), select=c(input$show_survey_vars, input$survey_spatial)), datatype="Census")
   })
 
@@ -121,10 +123,13 @@ compare_vars_scatterplot_fn <- function(cen, surv){
       theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5))
 }
 
-# render scatterplot
+# render all correlations scatterplot
 output$compare_vars_scatterplot=renderPlot({
   req(input$show_survey_vars)
   req(Surv_Agg(), Cen_Agg())
+  #shiny::validate(
+  ##  need(censusDF(), "Please check to see whether census data have been loaded.")
+  #)
   compare_vars_scatterplot_fn(cen=Cen_Agg(), surv=Surv_Agg())
 })
 
@@ -155,7 +160,11 @@ compare_vars_barplot_fn<-function(SURV, CEN){
 # render barplot
 output$compare_vars_barplot <- renderPlot({
   req(Surv_Agg(), Cen_Agg())
-  
+  shiny::validate(
+    need(censusDF(), "Please check to see whether census data have been loaded."),
+    need(sum(1-(input$Predictors %in% names(surveyDF())))==0 , "Predictor missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+  )
   compare_vars_barplot_fn(SURV=Surv_Agg(), CEN=Cen_Agg())
 })
 
@@ -165,7 +174,7 @@ output$compare_vars_barplot_down <-downloadHandler(
   
    filename = function() {
     paste0("barplot", ".jpg")
-  },
+   },
   content = function(file) {
     ggsave(file, compare_vars_barplot_fn(SURV=Surv_Agg(), CEN=Cen_Agg()))
   })
@@ -174,6 +183,12 @@ output$compare_vars_barplot_down <-downloadHandler(
 ### Multi-panel correlation plot between census and survey data for all variables
 ### 
 cen_agg_long <- reactive({
+  shiny::validate(
+    need(censusDF(), "Please check to see whether census data have been loaded."),
+    need(sum(1-(input$Predictors %in% names(surveyDF())))==0 , "Predictor missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded.")
+  )
+  
   subset(censusDF(), 
               select=c(input$Predictors,  input$survey_spatial)) %>%
               pivot_longer(cols=input$Predictors, 
@@ -204,7 +219,8 @@ surv_agg_long <- reactive({
 VarsR2Fun=function(cen,surv){
   shiny::validate(
     need(sum(1-(input$Predictors %in% names(surveyDF())))==0 , "Predictor missing in survey data.  
-         Check whether unnecessary census spatial variables have been excluded.")
+         Check whether unnecessary census spatial variables have been excluded."),
+    need(censusDF(), "Please check to see whether census data have been loaded.")
   )
   left_join(cen,surv) %>%
     ggplot(aes(x=n.surv, y=n.cen, colour=outcome)) + 

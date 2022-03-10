@@ -7,19 +7,28 @@ library(ggplot2)
 #### Check Aliasing
 # Button to run AliasTest
 Aliastest <- eventReactive(input$checkalias, {
+  shiny::validate(
+    need(sum(1-(input$Predictors %in% names(surveyDF())))==0, "Predictor missing in survey data.  
+         Check whether unnecessary census spatial variables have been excluded." )
+  )
   req(surveyDF())
   alias(formula(paste(input$indicator, "~" , 
                       paste0(input$model_params, collapse=" + "))), data=surveyDF())
 })
 
 # Alias report output
-output$Aliasreport <- renderPrint({
+Aliasout=reactive({
+  
   req(Aliastest())
   aliased=Aliastest()
   al_all=data.frame(aliased$Complete)
   al=names(al_all)[which(al_all<0)]
   if(length(al)>0) {print(paste("The variable(s) [", paste(al, collapse=", "), "] are perfectly correlated with other variables and should be removed."))
-    } else {print("No aliasing detected")}
+  } else {print("No aliasing detected")}
+})
+
+output$Aliasreport <- renderPrint({
+ Aliasout()
   })
 
 
@@ -27,10 +36,13 @@ output$Aliasreport <- renderPrint({
 ## VIF test on all variables
 VIFtest <- eventReactive(input$checkvif, {
   req(surveyDF())
+  shiny::validate(
+    need(Aliasout()=="No aliasing detected", "Cannot run Variance Inflation Test with Aliased variables")
+  )
   fullform=formula(paste(input$indicator, "~" , 
                          paste0(input$model_params, collapse=" + ")))
  mod=glm(fullform, data=surveyDF(), family="binomial")
- data.frame(vif(mod))
+ data.frame(vif(mod))[,1:2]
 })
 
 ## download VIF test
@@ -45,7 +57,11 @@ output$vif_down<-downloadHandler(
 
 # VIF tabular output
 output$VIFtable=DT::renderDataTable({
-  #req(VIFtest())
+  
+  shiny::validate(
+    need(VIFtest(), "VIF table not yet generated, please run VIF test.")
+  )
+  #req()
   DT::datatable(VIFtest())  %>%
     formatSignif(columns= which(sapply(VIFtest(), class) %in% c("numeric")), digits=2)
 })
@@ -95,13 +111,22 @@ output$include_rfx=renderUI({
 
 ## build formula
 form_rfx<-reactive({
-  #if(input$rfx_yes_no==T & input$modelbuild=="Random Effects")
-    paste(input$indicator, "~" ,paste0(input$model_params, collapse=" + "), "+ (1|", input$survey_spatial, ")") 
+  shiny::validate(
+    need(sum(1-(input$model_params %in% names(surveyDF())))==0, "Predictor missing in survey data.  
+         Check whether unneeded variables have been excluded." )
+  )
+  paste(input$indicator, "~" ,paste0(input$model_params, collapse=" + "), "+ (1|", input$survey_spatial, ")") 
 })
 
 
-form=reactive({ 
+form=reactive({
+  shiny::validate(
+    need(sum(1-(input$model_params %in% names(surveyDF())))==0, "Predictor missing in survey data.  
+         Check whether unneeded  variables have been excluded." )
+  )
+  
     paste(input$indicator, "~" , paste0(input$model_params, collapse=" + "), "+", input$survey_spatial)
+    
   })
 
 ## print formula as text

@@ -31,26 +31,6 @@ censusloadPanel=conditionalPanel(
             accept=c('.shp','.dbf','.sbn','.sbx','.shx','.prj','.cpg', '.xml', ".DBF"))
 ) 
 
-## Function for data file upload
-#uploadDF <- function(usedemo, loadfile, localfile){
-#  req(input$usedemo)
-#  path=ifelse(usedemo==TRUE, localfile, loadfile$datapath )
-  #if(usedemo==FALSE) {path = loadfile$datapath}
-  #else {path = localfile}
-#  read.csv(path) 
-#}
-
-#uploadDFpath <- function(usedemo, loadfile, localfile){
-#  path=ifelse(usedemo==TRUE, localfile, loadfile$datapath[1] )
-#  #if(usedemo==FALSE) {path = loadfile$datapath}
-  #else {path = localfile}
-#  print(path)
-#  print(input$usedemo)
-#  print(head(read.csv(path)))
-#  print(class(surveyDF()))
-#}
-
-#output$pathprint=renderPrint({uploadDFpath(usedemo=input$usedemo, loadfile=input$survey.file, localfile="R/data/DHS_formatted.csv")})
 
 # load survey DF
 rawsurveyDF <- reactive({
@@ -92,6 +72,10 @@ output$choose_survey_spatial <- renderUI({
 # choose response variables
 output$choose_census_vars <- renderUI({
   req(rawcensusDF())
+  shiny::validate(
+    need(input$survey_spatial %in% names(rawcensusDF()) , "Survey spatial area names missing in census data.  
+         Please check whether the right area has been selected.")
+   )
   rem= which(names(rawcensusDF()) %in% c(input$survey_spatial, input$census_spatial))
   checkboxGroupInput("Predictors", "Predictor variables", 
                      choices=names(rawcensusDF()[-c(rem)]), 
@@ -101,8 +85,12 @@ output$choose_census_vars <- renderUI({
 # census spatial identifier
 output$choose_census_spatial <- renderUI({
   #req(surveyShp())
+  shiny::validate(
+    need(input$survey_spatial %in% names(rawcensusDF()) , "Survey spatial area names missing in census data.  
+         Please check whether the right area has been selected.")
+  )
   req(rawcensusDF(), input$survey_spatial)
-  remspat= which(names(censusDF()) %in% c(input$survey_spatial))
+  remspat= which(names(rawcensusDF()) %in% c(input$survey_spatial))
   selectInput("census_spatial", "Census area names", names(rawcensusDF())[-remspat])
 })
 
@@ -110,6 +98,10 @@ output$choose_census_spatial <- renderUI({
 ### resulting survey table
 # 
 censusDF=reactive({
+  shiny::validate(
+    need(rawcensusDF(), "Please load census dataset", label="surveydfmissing"),
+    need(input$survey_spatial %in% names(rawcensusDF()), "Survey spatial variable not found in census data. Please check your selection")
+  )
   subset(rawcensusDF(), select=c(input$Predictors, input$census_spatial, input$survey_spatial))
 })
 

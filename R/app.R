@@ -32,12 +32,19 @@ ui <- fluidPage(
                                    onto census data.", 
                                    style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
                                  br(),
-                                 h4("Preparation"),
+                                 h4("Available Data"),
                                  p("For learning purposes, survey, census and spatial data are available for the Nepal 2015 DHS
                                    and 2015 census. Users can also load their own data, if they are properly formatted. 
                                    Data from Sierra Leone are also included for training pursposes.", 
                                    style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
-                                 #h5("Matching survey and census data")
+                                 br(),
+                                 h4("How to use this App"),
+                                 p("Each Tab at the top of the screen walks the user through a different stage of analysis.  Results at 
+                                   each stage are presented as tables or figures, which themselves can be downloaded. Error messages are 
+                                   displayed, if some part of the analysis goes wrong or data are not formatted correctly.  A full description
+                                   of the app is available in the user guide, and an overview of the full methods is present in the working
+                                   SAE paper.", 
+                                   style="text-align:center;color:black;background-color:lavender;padding:15px;border-radius:10px"),
             
                                  #fluidRow(column(6, img(src="www/surveyheader.png", height=140,width=240))),
                                  ))),
@@ -219,13 +226,14 @@ ui <- fluidPage(
                              h3("Alias Report"),
                              p("Aliasing exists when two variables are perfectly correlated."),
                              fluidRow(textOutput("Aliasreport")),
-                             p(),
+                             br(),
                              h3("Variance Inflation Table"),
                              p("Collinearity occurs when multiple variables are highly correlated with one another.  
                                Such correlations can make it difficult to estimate the coefficients for those variables.  Variance
                                 inflation factors help estimate the severity of multicollinearity in individual variables. Variables 
                                with a VIF score of greater than 2 should be excluded."),
                              fluidRow(DT::dataTableOutput("VIFtable")),
+                             br(),
                              fluidRow(downloadButton("vif_down", "Download VIF table"))
                      ),
                    
@@ -288,7 +296,7 @@ ui <- fluidPage(
                          then uses that model to predict into the remainder of the data. The true values are 
                          calculated compared to the predicted values to get an assessment of the model's predictive power. 
                          This process is repeated multiple times to determine how repeatable this predictive power is."),
-                       fluidRow(column(6, numericInput("numberfolds", "Number of Folds", 10))),
+                       fluidRow(column(6, numericInput("numberfolds", "Number of Folds", 5))),
                        conditionalPanel(condition="$('html').hasClass('shiny-busy')",
                                         tags$div("Running Cross Validation...",id="loadmessage")),
                        DT::dataTableOutput("xval_table") %>% withSpinner(color="#0dc5c1")     

@@ -100,28 +100,78 @@ output$roc.plot_down<- downloadHandler(
 
 
 ### Cross Validation
-### cross validate
+folded_surv=reactive({
+  newdat=pred_df()
+  newdat$sub=sample(1:input$numberfolds, nrow(newdat), replace=TRUE)
+  fold(newdat, k = input$numberfolds, cat_col=input$survey_spatial)  
+  })
+
+### put cross-validation insude a function
+xval_fn=function(dat, fold, rfx){
+  shiny::validate(
+    need(input$numberfolds>1, "Set number of folds to greater than 1"),
+    need(input$numberfolds, "Select a number of folds"),
+    need(input$numberfolds<25, "Select a number of folds less than 25")
+  )
+  
+  ## need to call the indicator 'indicator' for the roc function
+  dat$indicator=dat[[input$indicator]]
+  
+  moddat=subset(dat, .folds!=fold)
+  testdat=subset(dat, .folds==fold)
+  
+  if(rfx==T)
+    mod=glmer(form_rfx(), data=moddat, family="binomial")
+  else
+    mod=glm(form(), data=moddat, family="binomial")
+ 
+  moddat$prediction=predict(mod, type="response", newdata=moddat)
+  testdat$prediction=predict(mod, type="response", newdata=testdat)
+  
+  mod.roc=roc(moddat, response="indicator", predictor="prediction", ci=TRUE)
+  test.roc=roc(testdat, response="indicator", predictor="prediction", ci=TRUE)
+  
+  #mod.roc.ci=as.numeric(mod.roc$ci)
+  #xtest.roc.ci=as.numeric(test.roc$ci)
+  preds=data.frame(model.AUC=as.numeric(mod.roc$auc),
+                   test.AUC=as.numeric(test.roc$auc))
+
+  
+  #subdat=subset(dat, )
+  #xval=cross_validate(subdat)
+  #preds=(xval$Predictions[[1]]) %>%
+  #  arrange(Observation)
+  
+  #preds[[input$survey_spatial]] = dat[[input$survey_spatial]] 
+  #
+  #preds %>% group_by_at(.vars=c("Fold", input$survey_spatial)) %>%
+  #  summarise(nTarget=sum(Target),
+  #            nPred=sum(Prediction)) %>%
+  #  group_by(Fold) %>%
+  #  summarise(R2=cor(nTarget,nPred)^2,
+  #            RMSE=Metrics::rmse(nTarget,nPred))
+  return(preds)
+}
+
 xval=reactive({
-folded_surv <-  fold(pred_df(), k = input$numberfolds)      
-
-xval=cross_validate(folded_surv, formulas=form(), family="binomial")
-
-preds=(xval$Predictions[[1]]) %>%
-  arrange(Observation)
-
-preds[[input$survey_spatial]] =folded_surv[[input$survey_spatial]] 
-
-preds %>% group_by_at(.vars=c("Fold", input$survey_spatial)) %>%
-  summarise(nTarget=sum(Target),
-            nPred=sum(Prediction)) %>%
-  group_by(Fold) %>%
-  summarise(R2=cor(nTarget,nPred)^2,
-            RMSE=Metrics::rmse(nTarget,nPred))
+  
+  xvalout=data.frame()
+  
+  withProgress(message="calculating folds", value=0, min=0, max=1, {
+  for(i in 1:input$numberfolds){
+   incProgress(1/input$numberfolds)
+    #subdat=subset(folded_surv(), sub==i)
+     xv=xval_fn(dat=folded_surv(), fold=i, rfx=input$rfx_yes_no)
+     xvalout=rbind(xvalout, xv)
+  }
+  
+  })
+  xvalout
 })
 
 
 output$xval_table=DT::renderDataTable({
-  req(xval())
+
   DT::datatable(xval(), rownames=FALSE) %>%
     formatSignif(columns= which(sapply(xval(), class) %in% c("numeric")), digits=2)
 })
