@@ -131,6 +131,7 @@ form=reactive({
 
 ## print formula as text
 output$print_formula <- renderText({
+ 
   if(input$rfx_yes_no==T)
     form_rfx()
   else
@@ -140,6 +141,7 @@ output$print_formula <- renderText({
 
 ## create reactive model object
 mod=reactive({ 
+    
     if(input$rfx_yes_no==T)
       glmer(form_rfx(), data=surveyDF(), family="binomial")
     else
@@ -148,7 +150,10 @@ mod=reactive({
 
 ## Model Summary
 output$model_summary <- renderPrint({
-    summary(mod())
+  shiny::validate(
+    need(mod(), "")
+  )  
+  summary(mod())
 })
 
 # Model Summary Download

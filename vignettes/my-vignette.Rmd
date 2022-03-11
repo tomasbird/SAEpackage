@@ -146,7 +146,7 @@ The results of the Alias test will indicate whether there are variables that nee
 
 When variables are identified in the Alias test, you can remove them from the list of parameters
 
-![Removal of 'mother tongue' as a predictor](images/Tab4_Exclude_Parameters.png){#id .class width=40% height=40%}
+![Removal of 'mother tongue' as a predictor](images/Tab4_Exclude_Parameters.png){#id .class width=30% height=30%}
 
 After removing the indicated variables from the list of predictors, you should re-run the alias test, then you can run the VIF test to test for collinearity. 
 
@@ -183,10 +183,29 @@ Note that including random effects in the model will make it much slower to run.
 Following fitting of the model, it is important to check whether the model fit is suitable
 
 ## Assessment
-The 'Assess' tab provides a few ways to check the fit of the model.  The first is the residual plot, which shows each of the response values used in the model plotted against the 
+The 'Assess' tab two a few ways to check the fit of the model.  The first is the residual plot, which shows each of the predicted response values used in the model against the difference between the observed and predicted values.  A model that has equal dispersion of points above and below the line indicates an unbiased fit. 
+
+![Plot of model residuals](images/Tab5_Residplot.png){#id .class width=50% height=50%}
+
+We can also look at howthe observed values compare to the fitted values.  With binary variables this can be challenging to intepret, se we can look at observed and predicted values aggregated in survey regions.  Note that because we have included survey regions as a fixed or random effect, we expect that the model will usually perform very well at this aggregated level. 
+
+![Observed verus predicted outcomes aggregated at survey region level](images/Tab5_Obs_vs_pred.png){#id .class width=50% height=50%}
 
 
 # Validation
+Another way to evaluate  the predictive power for binomial random variables in a logistic model is to look at the percentage of times the model correctly classifies the response variable.  A Confusion matrix describes the percentage of time the model correctly predicts a true positive or true negative. A better-performing model should have higher true positive and negative rates than false rates. 
+
+![A confusion matrix showing the rate of true positives and negatives](images/Tab5_Confusion.png){#id .class width=50% height=50%}
+
+Another way to look at model performance is to examine the receiver-operator curve or ROC.  This curve plots 'Sensitivity' against 'Specificity', which can be described as the rate of false positives (y axis) at each level of true positivity (x axis). An ROC curve that is more convex (or farther from the diagonal) suggests better model performance.  
+
+![The Receiver-Operator Curve](images/Tab5_ROC.png){#id .class width=50% height=50%}
+
+
+
+
+
+
 
 ## Cross Validation
 

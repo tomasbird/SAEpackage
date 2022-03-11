@@ -3,7 +3,7 @@
 
 ## residual plot
 output$resid_plot <- renderPlot({
-  plot(mod())
+  plot(mod(), which=1)
 })
 
 # download residual plot
@@ -87,7 +87,10 @@ surveyroc=reactive({
   })
 
 # plot roc
-output$roc.plot=renderPlot({ plot.roc(surveyroc()) })
+output$roc.plot=renderPlot({ 
+  plot.roc(surveyroc())
+  text(0.2,0.2, paste0("AUC = ", round(surveyroc()$auc)))
+  })
 
 # download ROC curve
 output$roc.plot_down<- downloadHandler(
@@ -95,7 +98,8 @@ output$roc.plot_down<- downloadHandler(
     paste("ROC_Curve", ".jpg", sep = "")
   },
   content = function(file) {
-    plot.roc(surveyroc())  }
+    plot.roc(surveyroc()) 
+    text(0.2,0.2, paste0("AUC = ", round(surveyroc()$auc)))}
 )
 
 
@@ -137,19 +141,7 @@ xval_fn=function(dat, fold, rfx){
                    test.AUC=as.numeric(test.roc$auc))
 
   
-  #subdat=subset(dat, )
-  #xval=cross_validate(subdat)
-  #preds=(xval$Predictions[[1]]) %>%
-  #  arrange(Observation)
   
-  #preds[[input$survey_spatial]] = dat[[input$survey_spatial]] 
-  #
-  #preds %>% group_by_at(.vars=c("Fold", input$survey_spatial)) %>%
-  #  summarise(nTarget=sum(Target),
-  #            nPred=sum(Prediction)) %>%
-  #  group_by(Fold) %>%
-  #  summarise(R2=cor(nTarget,nPred)^2,
-  #            RMSE=Metrics::rmse(nTarget,nPred))
   return(preds)
 }
 
