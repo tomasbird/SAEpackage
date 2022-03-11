@@ -89,7 +89,7 @@ surveyroc=reactive({
 # plot roc
 output$roc.plot=renderPlot({ 
   plot.roc(surveyroc())
-  text(0.2,0.2, paste0("AUC = ", round(surveyroc()$auc)))
+  text(0.2,0.2, paste0("AUC = ", round(surveyroc()$auc, 3)))
   })
 
 # download ROC curve
@@ -99,7 +99,7 @@ output$roc.plot_down<- downloadHandler(
   },
   content = function(file) {
     plot.roc(surveyroc()) 
-    text(0.2,0.2, paste0("AUC = ", round(surveyroc()$auc)))}
+    text(0.2,0.2, paste0("AUC = ", signif(surveyroc()$auc, 3)))}
 )
 
 

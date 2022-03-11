@@ -197,7 +197,7 @@ Another way to evaluate  the predictive power for binomial random variables in a
 
 ![A confusion matrix showing the rate of true positives and negatives](images/Tab5_Confusion.png){#id .class width=50% height=50%}
 
-Another way to look at model performance is to examine the receiver-operator curve or ROC.  This curve plots 'Sensitivity' against 'Specificity', which can be described as the rate of false positives (y axis) at each level of true positivity (x axis). An ROC curve that is more convex (or farther from the diagonal) suggests better model performance.  
+Another way to look at model performance is to examine the receiver-operator curve or ROC.  This curve plots 'Sensitivity' against 'Specificity', which can be described as the rate of false positives (y axis) at each level of true positivity (x axis). An ROC curve that is more convex (or farther from the diagonal) suggests better model performance.  The area under the ROC curve (or AUC) provides a measure of the model accuracy; an AUC of 0.5 means the model cannot predict with any accuracy, while an AUC means it is perfectly accurate.  Values of greater than 0.75 suggest relatively good model performance.    
 
 ![The Receiver-Operator Curve](images/Tab5_ROC.png){#id .class width=50% height=50%}
 
@@ -208,7 +208,7 @@ Another way to look at model performance is to examine the receiver-operator cur
 
 
 ## Cross Validation
-
+Finally, the goal of small area prediction is to predict data into areas that have not been sampled.  The most effective way to tell whether a model is reliable in this case is to perform croass-validation testing.  Here,  we randonly split the data into sections called 'Folds'.  In each iteration of the cross-validation, one of these folds is excluded from the main data (the testing data), then the remaining data are used to build the model (the training data).  The resulting model is then used to predict the indicator of interest in both sets of data with similar accuracy.  
 
 # Prediction
 
