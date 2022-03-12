@@ -40,5 +40,4 @@ The application consists of different tabs for each stage of the analysis. These
 # Landing Page
 The landing page provides the gateway to the application features. Use the tabs at the top of the page to access different parts of the application. 
   
-<br/>
-![Application Landing Page](images/LandingPage.png){#id .class width=70% height=70%}
+
