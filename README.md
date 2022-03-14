@@ -18,4 +18,4 @@ This package demonstrates small area estimation using logistic regression.
 
 ![https://raw.githubusercontent.com/tomasbird/SAEpackage/main/img/Census_Tab.png](Landing page second try)
 
-![/tomasbird/SAEpackage//blob/master/img/Census_Tab.png](Landing page second try)
+![tomasbird/SAEpackage//blob/master/img/Census_Tab.png](Landing page second try)
