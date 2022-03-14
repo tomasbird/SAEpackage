@@ -13,7 +13,7 @@ This package demonstrates small area estimation using logistic regression.
 9. When the load has completed, type 'SAEapp()' to start the application
 
 
-![/main/img/LandingPage.png](Landing page first try)
+![Landing page 1](/img/LandingPage.png)
 
 
 ![https://raw.githubusercontent.com/tomasbird/SAEpackage/main/img/Census_Tab.png](Landing page second try)
