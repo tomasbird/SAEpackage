@@ -11,11 +11,3 @@ This package demonstrates small area estimation using logistic regression.
 7. To prepare the App in Rstudio, hold down 'ctrl +shift + L' (windows) or 'cmd + shift + L' (mac/linux).
 8. On the first loading of the App,  Rstudio will probably take a long time downloading and installing other packages needed to run the App.  This only happens the first time the app is run, please be patient.
 9. When the load has completed, type 'SAEapp()' to start the application
-
-
-![Landing page 1](/img/LandingPage.png)
-
-
-![https://raw.githubusercontent.com/tomasbird/SAEpackage/main/img/Census_Tab.png](Landing page second try)
-
-![tomasbird/SAEpackage//blob/master/img/Census_Tab.png](Landing page second try)
