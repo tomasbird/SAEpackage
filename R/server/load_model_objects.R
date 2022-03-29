@@ -73,6 +73,7 @@ output$VIFtable=DT::renderDataTable({
 
 # run multi-model inference
 swfun=function(mod, scope=list(~.), dir="both") {
+  
   stepAIC(object=mod, scope=scope, direction=dir)
 }
 
@@ -83,7 +84,8 @@ r$stepwise=NULL
 
 observeEvent(input$runstepwise, {
   r$runstepwise=1
-  r$stepwise=swfun(mod=mod(), scope=list(~.), dir="both")
+  swmod=glm(form(), data=surveyDF(), family="binomial")
+  r$stepwise=swfun(mod=swmod, scope=list(~.), dir="both")
 })
 
 ## switch for resetting variables

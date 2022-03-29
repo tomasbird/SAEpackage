@@ -204,7 +204,8 @@ ui <- fluidPage(
                     ),
                 conditionalPanel('input.modelbuild=="Build the Model"',
                     h3("Stepwise regression"),
-                    p("Stepwise regression selects a best subset of the available variables."),
+                    p("Stepwise regression selects a best subset of the available variables. Please do this 
+                      before including a random effect."),
                     br(),
                     actionButton("runstepwise", "Stepwise variable selection", icon=icon("shoe-prints")),             
                     uiOutput("include_rfx")
