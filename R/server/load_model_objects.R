@@ -110,6 +110,10 @@ output$include_rfx=renderUI({
   checkboxInput("rfx_yes_no", "Include a Regional random effect", value=FALSE)
 })
 
+output$include_ffx=renderUI({
+  checkboxInput("ffx_yes_no", "Include a Regional fixed effect", value=FALSE)
+})
+
 
 ## build formula
 form_rfx<-reactive({
@@ -120,6 +124,14 @@ form_rfx<-reactive({
   paste(input$indicator, "~" ,paste0(input$model_params, collapse=" + "), "+ (1|", input$survey_spatial, ")") 
 })
 
+form_ffx<-reactive({
+  shiny::validate(
+    need(sum(1-(input$model_params %in% names(surveyDF())))==0, "Predictor missing in survey data.  
+         Check whether unneeded variables have been excluded." )
+  )
+  paste(input$indicator, "~" ,paste0(input$model_params, collapse=" + "),  "+", input$survey_spatial)
+})
+
 
 form=reactive({
   shiny::validate(
@@ -127,7 +139,7 @@ form=reactive({
          Check whether unneeded  variables have been excluded." )
   )
   
-    paste(input$indicator, "~" , paste0(input$model_params, collapse=" + "), "+", input$survey_spatial)
+    paste(input$indicator, "~" , paste0(input$model_params, collapse=" + "))
     
   })
 
@@ -136,6 +148,8 @@ output$print_formula <- renderText({
  
   if(input$rfx_yes_no==T)
     form_rfx()
+  else if(input$ffx_yes_no==T)
+    form_ffx()
   else
     form()
   })
@@ -146,6 +160,8 @@ mod=reactive({
     
     if(input$rfx_yes_no==T)
       glmer(form_rfx(), data=surveyDF(), family="binomial")
+    else if (input$ffx_yes_no==T)
+      glm(form_ffx(), data=surveyDF(), family="binomial")
     else
       glm(form(), data=surveyDF(), family="binomial")
 })
@@ -158,13 +174,5 @@ output$model_summary <- renderPrint({
   summary(mod())
 })
 
-# Model Summary Download
-#output$model_summary_down<-downloadHandler(
-#  filename = function() {
-#    paste0("model_summary_table", ".csv")
-#  },
-#  content = function(file) {
-#    write.csv(file, plot(mod()))
-#  })
 
 

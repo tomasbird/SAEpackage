@@ -208,7 +208,8 @@ ui <- fluidPage(
                       before including a random effect."),
                     br(),
                     actionButton("runstepwise", "Stepwise variable selection", icon=icon("shoe-prints")),             
-                    uiOutput("include_rfx")
+                    uiOutput("include_rfx"),
+                    uiOutput("include_ffx")
                     ),
                 h4("Included Variables"),
                 p("Variables to include in the final model. Uncheck those that you 
